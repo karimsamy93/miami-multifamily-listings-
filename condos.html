@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Condo Listings — Miami Multifamily Minute</title>
+  <meta name="description" content="South Florida condo listings curated by Miami Multifamily Minute, updated every 2 weeks.">
+  <!-- Favicon: upload Favicon-01.png to your GitHub repo root alongside this file -->
+  <link rel="icon" type="image/png" href="Favicon-01.png">
+  <link rel="apple-touch-icon" href="Favicon-01.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       CONFIGURATION — update SHEET_CSV_URL in the script block below
+       ============================================================ */
+
+    :root {
+      --green:       #04443C;
+      --green-dark:  #022E28;
+      --green-light: #F0F9F7;
+      --green-mid:   #0A6B5E;
+      --gold:        #F5A623;
+      --gold-light:  #FFF8EC;
+      --gold-border: #FDE68A;
+      --text:        #1A1A1A;
+      --text-muted:  #6B7280;
+      --border:      #E5E7EB;
+      --bg:          #F8F9FA;
+      --white:       #FFFFFF;
+      --red:         #DC2626;
+      --blue:        #1D6ED8;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    header {
+      background: var(--green);
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(10,107,94,0.6) 0%, transparent 60%),
+        radial-gradient(ellipse at 90% 80%, rgba(2,46,40,0.8) 0%, transparent 50%);
+      color: var(--white);
+      padding: 2.5rem 1.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 30%, var(--gold));
+    }
+
+    .header-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .header-left { flex: 1; min-width: 260px; }
+
+    .header-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+    }
+
+    .header-eyebrow span { opacity: 0.6; color: var(--white); }
+
+    .site-logo {
+      height: 56px;
+      width: auto;
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+
+    header h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(1.7rem, 4vw, 2.4rem);
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    .header-sub {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.65);
+    }
+
+    #last-updated {
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.45);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    #last-updated::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.75rem;
+      padding-top: 0.25rem;
+    }
+
+    .nav-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--white);
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.45rem 1rem;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-pill:hover {
+      background: rgba(255,255,255,0.18);
+      border-color: rgba(255,255,255,0.35);
+    }
+
+    .newsletter-link {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.4);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .newsletter-link:hover { color: var(--gold); }
+
+    @media (max-width: 640px) {
+      .header-right { align-items: flex-start; }
+    }
+
+    /* ── STATS BAR ───────────────────────────────────────────── */
+    .stats-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1.5rem;
+    }
+
+    .stats-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: var(--green);
+      font-size: 0.9rem;
+    }
+
+    .stat-sep { color: var(--border); font-size: 1.2rem; }
+
+    /* ── MAIN ────────────────────────────────────────────────── */
+    main {
+      max-width: 1140px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── FILTERS ─────────────────────────────────────────────── */
+    .filters-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      flex: 1;
+      min-width: 130px;
+    }
+
+    .filter-group.wide { min-width: 200px; flex: 2; }
+
+    .filter-group label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .filter-group input,
+    .filter-group select {
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      background: var(--white);
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .filter-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      padding-right: 2.2rem;
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(4,68,60,0.08);
+    }
+
+    .result-count {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      align-self: center;
+      white-space: nowrap;
+      padding-bottom: 0.1rem;
+    }
+
+    .result-count strong { color: var(--green); }
+
+    /* ── TABLE ───────────────────────────────────────────────── */
+    .table-wrap {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    .table-scroll { width: 100%; overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      white-space: nowrap;
+      font-size: 0.88rem;
+    }
+
+    thead th {
+      background: #F4F6F5;
+      padding: 0.85rem 1rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #4B5563;
+      border-bottom: 2px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      position: sticky;
+      top: 0;
+    }
+
+    thead th:hover { background: #ECF0EF; }
+    thead th.sorted { color: var(--green); }
+
+    .sort-arrow {
+      display: inline-block;
+      margin-left: 4px;
+      color: var(--gold);
+      font-size: 0.8em;
+    }
+
+    tbody td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid #F3F4F6;
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background 0.1s; }
+    tbody tr:hover td { background: rgba(4,68,60,0.03) !important; }
+
+    tbody tr.row-alt  { background: #FAFAFA; }
+    tbody tr.row-norm { background: var(--white); }
+
+    /* High DOM flag */
+    .dom-high { color: var(--red); font-weight: 600; }
+
+    .hoa-high { color: var(--red); }
+
+    .price-tag {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .mls-link {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 500;
+      border-bottom: 1px solid rgba(29,110,216,0.3);
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .mls-link:hover {
+      color: #1450A8;
+      border-bottom-color: #1450A8;
+    }
+
+    .beds-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--green-light);
+      color: var(--green);
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 100px;
+      min-width: 2rem;
+    }
+
+    /* ── LOADING / ERROR ─────────────────────────────────────── */
+    .state-box {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(4,68,60,0.12);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .state-box p { color: var(--text-muted); font-size: 0.95rem; }
+
+    .error-box {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: var(--red);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    /* ── FOOTER ──────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 2.5rem 1.5rem 3rem;
+      margin-top: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    footer a { color: var(--green); font-weight: 600; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    .footer-disclaimer { margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.7; }
+
+    @media (max-width: 600px) {
+      main { padding: 0 1rem; }
+      .filters-card { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="header-left">
+        <!-- Logo — upload Logo-01.png to your GitHub repo root alongside this file -->
+        <img src="Logo-01.png" alt="Miami Multifamily Minute" class="site-logo">
+        <p class="header-sub">South Florida condos curated every 2 weeks &mdash; browse, filter, and explore</p>
+        <div id="last-updated">Loading data...</div>
+      </div>
+      <div class="header-right">
+        <a href="index.html" class="nav-pill">← View Multifamily Listings</a>
+        <a href="https://miamimultifamilymin.com" target="_blank" class="newsletter-link">← Back to Newsletter</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div class="stat-item">
+        <span>Total condos:</span>
+        <span class="stat-value" id="stat-total">—</span>
+      </div>
+      <span class="stat-sep">|</span>
+      <div class="stat-item">
+        <span>Cities covered:</span>
+        <span class="stat-value" id="stat-cities">—</span>
+      </div>
+      <span class="stat-sep">|</span>
+      <div class="stat-item">
+        <span>Avg. list price:</span>
+        <span class="stat-value" id="stat-avg-price">—</span>
+      </div>
+      <span class="stat-sep">|</span>
+      <div class="stat-item">
+        <span>Updated every 2 weeks</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div id="loading" class="state-box">
+      <div class="spinner"></div>
+      <p>Loading listings...</p>
+    </div>
+
+    <div id="app" style="display:none">
+
+      <div class="filters-card">
+        <div class="filter-group wide">
+          <label for="search">Search</label>
+          <input type="text" id="search" placeholder="Address, Building, or MLS ID...">
+        </div>
+        <div class="filter-group">
+          <label for="city">Location</label>
+          <select id="city">
+            <option value="">All Locations</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="beds">Beds</label>
+          <select id="beds">
+            <option value="">All</option>
+            <option value="1">1 Bed</option>
+            <option value="2">2 Beds</option>
+            <option value="3">3 Beds</option>
+            <option value="4+">4+ Beds</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="max-hoa">Max HOA/mo</label>
+          <select id="max-hoa">
+            <option value="">Any</option>
+            <option value="500">Under $500</option>
+            <option value="1000">Under $1,000</option>
+            <option value="1500">Under $1,500</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="max-price">Max Price</label>
+          <select id="max-price">
+            <option value="">Any</option>
+            <option value="300000">Under $300K</option>
+            <option value="500000">Under $500K</option>
+            <option value="750000">Under $750K</option>
+          </select>
+        </div>
+        <div class="result-count" id="result-count"></div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /#app -->
+  </main>
+
+  <footer>
+    <div>Powered by <a href="https://miamimultifamilymin.com" target="_blank">Miami Multifamily Minute</a> &mdash; written by Karim Samy</div>
+    <div class="footer-disclaimer">Not financial advice. For informational purposes only. Data updated every 2 weeks.</div>
+  </footer>
+
+  <script>
+    // ============================================================
+    // ★  UPDATE THIS URL after publishing your Google Sheet as CSV
+    //    File → Share → Publish to web → Sheet (Condos) → CSV → Copy link
+    // ============================================================
+    const SHEET_CSV_URL = "YOUR_CONDO_GOOGLE_SHEET_CSV_URL_HERE";
+
+    const DISPLAY_COLUMNS = [
+      'MLS ID', 'Address', 'Location', 'Building/Complex',
+      'Beds', 'Baths', 'List Price', 'HOA Fee/mo', 'Days on Market'
+    ];
+
+    const NUMERIC_COLUMNS = ['Beds', 'Baths', 'List Price', 'HOA Fee/mo', 'Days on Market'];
+
+    let rawData = [];
+    let filteredData = [];
+    let currentSort = { column: 'List Price', direction: 'asc' };
+
+    async function init() {
+      try {
+        const res = await fetch(SHEET_CSV_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        rawData = parseCSV(text);
+        if (!rawData.length) throw new Error('No data found in sheet.');
+
+        populateCityFilter();
+        updateStats();
+        setLastUpdated();
+
+        filteredData = [...rawData];
+        sortData();
+        renderHeaders();
+        renderTable();
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        setupListeners();
+
+      } catch (err) {
+        document.getElementById('loading').innerHTML =
+          '<div class="error-box"><strong>Could not load listings.</strong><br>Check the CSV URL or try again later.<br><small style="opacity:0.7">' + err.message + '</small></div>';
+      }
+    }
+
+    function setLastUpdated() {
+      const el = document.getElementById('last-updated');
+      const sample = rawData[0] || {};
+      const dateVal = sample['Last Updated'] || sample['last_updated'] || sample['LastUpdated'];
+      el.textContent = dateVal ? 'Last updated: ' + dateVal : 'Last updated: Current issue';
+    }
+
+    function updateStats() {
+      document.getElementById('stat-total').textContent = rawData.length;
+      const cities = new Set(rawData.map(r => r['City'] || r['Location'] || r['Zip'] || '').filter(Boolean));
+      document.getElementById('stat-cities').textContent = cities.size;
+      const prices = rawData.map(r => parseNumber(r['List Price'])).filter(n => !isNaN(n));
+      if (prices.length) {
+        const avg = prices.reduce((a,b) => a+b, 0) / prices.length;
+        document.getElementById('stat-avg-price').textContent = '$' + Math.round(avg / 1000) + 'K';
+      }
+    }
+
+    function setupListeners() {
+      ['search','city','beds','max-hoa','max-price'].forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('input', applyFilters);
+        el.addEventListener('change', applyFilters);
+      });
+    }
+
+    function populateCityFilter() {
+      const sel = document.getElementById('city');
+      const cities = new Set();
+      rawData.forEach(r => {
+        const loc = r['City'] || r['Location'] || r['ZIP'] || r['Zip'] || '';
+        if (loc) cities.add(loc.trim());
+      });
+      Array.from(cities).sort().forEach(city => {
+        const opt = document.createElement('option');
+        opt.value = city; opt.textContent = city;
+        sel.appendChild(opt);
+      });
+    }
+
+    function applyFilters() {
+      const q        = document.getElementById('search').value.toLowerCase().trim();
+      const city     = document.getElementById('city').value;
+      const beds     = document.getElementById('beds').value;
+      const maxHoa   = parseFloat(document.getElementById('max-hoa').value) || 0;
+      const maxPrice = parseFloat(document.getElementById('max-price').value) || 0;
+
+      filteredData = rawData.filter(row => {
+        const loc = row['City'] || row['Location'] || row['ZIP'] || row['Zip'] || '';
+
+        if (q) {
+          const addr     = (row['Address'] || '').toLowerCase();
+          const building = (row['Building/Complex'] || '').toLowerCase();
+          const mls      = (row['MLS ID'] || row['MLS #'] || '').toLowerCase();
+          if (!addr.includes(q) && !building.includes(q) && !mls.includes(q)) return false;
+        }
+        if (city && loc.trim() !== city) return false;
+        if (beds) {
+          const b = parseNumber(row['Beds'] || (row['Beds/Baths'] || '').split('/')[0]);
+          if (beds === '4+' ? b < 4 : b !== parseInt(beds)) return false;
+        }
+        if (maxHoa > 0) {
+          const h = parseNumber(row['HOA Fee/mo'] || row['HOA/mo']);
+          if (!isNaN(h) && h >= maxHoa) return false;
+        }
+        if (maxPrice > 0) {
+          const p = parseNumber(row['List Price']);
+          if (!isNaN(p) && p >= maxPrice) return false;
+        }
+        return true;
+      });
+
+      sortData(); renderHeaders(); renderTable();
+      const rc = document.getElementById('result-count');
+      rc.innerHTML = `Showing <strong>${filteredData.length}</strong> of ${rawData.length} listings`;
+    }
+
+    function sortData() {
+      const col = currentSort.column;
+      const dir = currentSort.direction === 'asc' ? 1 : -1;
+      const num = NUMERIC_COLUMNS.includes(col);
+      filteredData.sort((a, b) => {
+        let vA = getVal(a, col), vB = getVal(b, col);
+        if (num) {
+          let nA = parseNumber(vA), nB = parseNumber(vB);
+          if (isNaN(nA)) nA = dir > 0 ? Infinity : -Infinity;
+          if (isNaN(nB)) nB = dir > 0 ? Infinity : -Infinity;
+          return (nA - nB) * dir;
+        }
+        return String(vA).localeCompare(String(vB)) * dir;
+      });
+    }
+
+    function getVal(row, col) {
+      if (col === 'MLS ID')         return row['MLS ID'] || row['MLS #'] || '';
+      if (col === 'Location')       return row['City'] || row['Location'] || row['ZIP'] || row['Zip'] || '';
+      if (col === 'HOA Fee/mo')     return row['HOA Fee/mo'] || row['HOA/mo'] || '';
+      if (col === 'Beds')           return row['Beds'] || (row['Beds/Baths'] || '').split('/')[0] || '';
+      if (col === 'Baths')          return row['Baths'] || (row['Beds/Baths'] || '').split('/')[1] || '';
+      if (col === 'Building/Complex') return row['Building/Complex'] || row['Building'] || '';
+      return row[col] || '';
+    }
+
+    function handleSort(col) {
+      currentSort.direction = currentSort.column === col
+        ? (currentSort.direction === 'asc' ? 'desc' : 'asc')
+        : 'asc';
+      currentSort.column = col;
+      sortData(); renderHeaders(); renderTable();
+    }
+
+    function renderHeaders() {
+      const thead = document.getElementById('table-head');
+      thead.innerHTML = '';
+      const tr = document.createElement('tr');
+      DISPLAY_COLUMNS.forEach(col => {
+        const th = document.createElement('th');
+        th.onclick = () => handleSort(col);
+        const isSorted = currentSort.column === col;
+        if (isSorted) th.classList.add('sorted');
+        const arrow = isSorted
+          ? `<span class="sort-arrow">${currentSort.direction === 'asc' ? '↑' : '↓'}</span>`
+          : `<span class="sort-arrow" style="opacity:0.25">↕</span>`;
+        th.innerHTML = col + arrow;
+        tr.appendChild(th);
+      });
+      thead.appendChild(tr);
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      if (!filteredData.length) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="${DISPLAY_COLUMNS.length}" style="text-align:center;padding:3rem;color:var(--text-muted)">No listings match your filters.</td>`;
+        tbody.appendChild(tr);
+        return;
+      }
+
+      let altCount = 0;
+      filteredData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = altCount++ % 2 === 0 ? 'row-norm' : 'row-alt';
+
+        DISPLAY_COLUMNS.forEach(col => {
+          const td = document.createElement('td');
+          let val = getVal(row, col);
+
+          switch (col) {
+            case 'MLS ID': {
+              const url = row['Listing URL'] || row['Listing Link'] || '#';
+              td.innerHTML = url !== '#'
+                ? `<a href="${url}" target="_blank" rel="noopener" class="mls-link">${val || '—'}</a>`
+                : (val || '—');
+              break;
+            }
+            case 'List Price':
+              td.innerHTML = `<span class="price-tag">${fmtPrice(val)}</span>`;
+              break;
+            case 'HOA Fee/mo': {
+              const h = parseNumber(val);
+              const cls = !isNaN(h) && h >= 1000 ? 'hoa-high' : '';
+              td.innerHTML = `<span class="${cls}">${isNaN(h) ? '—' : '$'+h.toLocaleString('en-US',{maximumFractionDigits:0})+'/mo'}</span>`;
+              break;
+            }
+            case 'Days on Market': {
+              const dom = parseNumber(val);
+              if (isNaN(dom)) { td.textContent = '—'; break; }
+              td.innerHTML = dom > 60
+                ? `<span class="dom-high">${dom} days</span>`
+                : `${dom} days`;
+              break;
+            }
+            case 'Beds':
+              td.innerHTML = val ? `<span class="beds-badge">${val} bd</span>` : '—';
+              break;
+            case 'Baths':
+              td.textContent = val ? val + ' ba' : '—';
+              break;
+            default:
+              td.textContent = val || '—';
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+
+      const rc = document.getElementById('result-count');
+      if (!rc.innerHTML) {
+        rc.innerHTML = `Showing <strong>${filteredData.length}</strong> of ${rawData.length} listings`;
+      }
+    }
+
+    // ── UTILS ────────────────────────────────────────────────────
+    function parseNumber(str) {
+      if (!str && str !== 0) return NaN;
+      if (typeof str === 'number') return str;
+      return parseFloat(str.toString().replace(/[^0-9.-]+/g, ''));
+    }
+
+    function fmtPrice(val) {
+      const n = parseNumber(val);
+      return isNaN(n) ? '—' : '$' + n.toLocaleString('en-US', {maximumFractionDigits:0});
+    }
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], val = '', inQ = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQ) {
+          if (c === '"' && text[i+1] === '"') { val += '"'; i++; }
+          else if (c === '"') inQ = false;
+          else val += c;
+        } else {
+          if (c === '"') inQ = true;
+          else if (c === ',') { row.push(val); val = ''; }
+          else if (c === '\n') { row.push(val); rows.push(row); row = []; val = ''; }
+          else if (c !== '\r') val += c;
+        }
+      }
+      if (val || row.length) { row.push(val); rows.push(row); }
+      if (!rows.length) return [];
+
+      let hIdx = 0;
+      for (let i = 0; i < Math.min(rows.length, 5); i++) {
+        if (rows[i].filter(v => v.trim()).length >= 5) { hIdx = i; break; }
+      }
+
+      const headers = rows[hIdx].map(h => h.trim());
+      return rows.slice(hIdx + 1)
+        .filter(r => r.filter(v => v.trim()).length > 1)
+        .map(r => Object.fromEntries(headers.map((h, j) => [h, (r[j] || '').trim()])));
+    }
+
+    init();
+  </script>
+</body>
+</html>
