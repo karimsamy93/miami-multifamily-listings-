@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" href="Favicon-01.png">
   <link rel="apple-touch-icon" href="Favicon-01.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     /* ============================================================
        CONFIGURATION — update SHEET_CSV_URL in the script block below
@@ -35,7 +35,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'DM Sans', system-ui, sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       color: var(--text);
       background: var(--bg);
       line-height: 1.6;
@@ -328,54 +328,79 @@
     }
 
     tbody tr:last-child td { border-bottom: none; }
-    tbody tr { transition: background 0.1s; }
-    tbody tr:hover td { background: rgba(4,68,60,0.03) !important; }
-
-    tbody tr.row-alt  { background: #FAFAFA; }
+    /* ── HYBRID TABLE & DETAIL CARD ──────────────────────────── */
+    tbody tr.main-row { cursor: pointer; transition: background 0.1s; }
+    tbody tr.main-row:hover td { background: rgba(4,68,60,0.03) !important; }
+    tbody tr.row-alt { background: #FAFAFA; }
     tbody tr.row-norm { background: var(--white); }
 
-    /* High DOM flag */
-    .dom-high { color: var(--red); font-weight: 600; }
-
-    .hoa-high { color: var(--red); }
-
-    .price-tag {
-      font-weight: 600;
-      color: var(--text);
+    tbody tr.row-top3 { background: #F0F9F7 !important; }
+    tbody tr.row-top3 td:first-child {
+      border-left: 3px solid #04443C;
+      padding-left: calc(1rem - 3px);
     }
 
-    .mls-link {
-      color: var(--blue);
-      text-decoration: none;
-      font-weight: 500;
-      border-bottom: 1px solid rgba(29,110,216,0.3);
-      transition: color 0.15s, border-color 0.15s;
+    .chevron-cell {
+      width: 40px; text-align: center; color: var(--gold);
+      font-size: 1.2rem; transition: transform 0.2s;
     }
+    tr.expanded .chevron-cell { transform: rotate(90deg); }
 
-    .mls-link:hover {
-      color: #1450A8;
-      border-bottom-color: #1450A8;
+    .detail-row { display: none; }
+    .detail-row.open { display: table-row; }
+    .detail-row td { padding: 0 !important; border-bottom: 2px solid var(--border) !important; border-top: 1px solid rgba(0,0,0,0.05); }
+    
+    .detail-card {
+      background: #F0F9F7;
+      border-left: 3px solid #04443C;
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      box-shadow: inset 0 3px 6px rgba(0,0,0,0.02);
     }
-
-    .beds-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--green-light);
-      color: var(--green);
-      font-weight: 700;
-      font-size: 0.78rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 100px;
-      min-width: 2rem;
+    
+    .detail-section { display: flex; flex-direction: column; gap: 0.8rem; }
+    .detail-item {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.85rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(0,0,0,0.06);
     }
-
-    /* ── LOADING / ERROR ─────────────────────────────────────── */
-    .state-box {
-      text-align: center;
-      padding: 4rem 2rem;
+    .detail-label { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; }
+    .detail-value { font-weight: 600; color: var(--text); }
+    
+    .view-btn {
+      display: inline-flex; justify-content: center; align-items: center;
+      background: #04443C; color: var(--white);
+      text-decoration: none; padding: 0.7rem 1.2rem; border-radius: 6px;
+      font-weight: 600; font-size: 0.85rem; margin-top: 0.5rem;
+      transition: opacity 0.2s;
     }
+    .view-btn:hover { opacity: 0.9; color: var(--white); }
 
+    /* Cell styles */
+    .address-cell {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .hoa-high { color: #DC2626; font-weight: 600; }
+
+    .cash-neg { color: #DC2626; font-weight: 600; }
+    .cash-pos { color: #16A34A; font-weight: 600; }
+
+    .ratio-pill {
+      display: inline-flex; justify-content: center; align-items: center;
+      padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.78rem; font-weight: 700;
+      min-width: 60px;
+    }
+    .ratio-pass { background: #D1FAE5; color: #065F46; }
+    .ratio-close { background: #FEF3C7; color: #92400E; }
+    .ratio-miss  { background: #FEE2E2; color: #991B1B; }
+
+    /* Empty / Loading / Error */
+    .state-box { text-align: center; padding: 4rem 2rem; }
     .spinner {
       width: 36px; height: 36px;
       border: 3px solid rgba(4,68,60,0.12);
@@ -384,9 +409,7 @@
       animation: spin 0.8s linear infinite;
       margin: 0 auto 1rem;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
-
     .state-box p { color: var(--text-muted); font-size: 0.95rem; }
 
     .error-box {
@@ -414,9 +437,15 @@
     footer a:hover { text-decoration: underline; }
     .footer-disclaimer { margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.7; }
 
-    @media (max-width: 600px) {
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hide-mobile { display: none !important; }
+      .detail-card { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; }
+      .filter-group { min-width: 100%; }
       main { padding: 0 1rem; }
-      .filters-card { padding: 1rem; }
+      .filters-card { padding: 1rem; flex-direction: column; align-items: stretch; }
+      .stats-bar { padding: 0.75rem 1rem; }
+      .stats-inner { gap: 1rem; }
     }
   </style>
 </head>
@@ -490,23 +519,15 @@
           </select>
         </div>
         <div class="filter-group">
-          <label for="max-hoa">Max HOA/mo</label>
-          <select id="max-hoa">
+          <label for="min-ratio">Min 1% Ratio</label>
+          <select id="min-ratio">
             <option value="">Any</option>
-            <option value="500">Under $500</option>
-            <option value="1000">Under $1,000</option>
-            <option value="1500">Under $1,500</option>
+            <option value="0.90">0.90%+</option>
+            <option value="0.95">0.95%+</option>
+            <option value="1.00">1.00%+ ✓</option>
           </select>
         </div>
-        <div class="filter-group">
-          <label for="max-price">Max Price</label>
-          <select id="max-price">
-            <option value="">Any</option>
-            <option value="300000">Under $300K</option>
-            <option value="500000">Under $500K</option>
-            <option value="750000">Under $750K</option>
-          </select>
-        </div>
+
         <div class="result-count" id="result-count"></div>
       </div>
 
@@ -535,15 +556,18 @@
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1IWCCuVt7qNqWVn45IoCW35HiYERvdb2s/gviz/tq?tqx=out:csv&gid=866929728";
 
     const DISPLAY_COLUMNS = [
-      'MLS ID', 'Address', 'Location', 'Building/Complex',
-      'Beds', 'Baths', 'List Price', 'HOA Fee/mo', 'Days on Market'
+      'Rank', 'Address', 'Beds/Baths', 'List Price', 'Est. Rent/mo',
+      '1% Ratio', 'Monthly Cash Flow', 'CoC Return', ''
     ];
 
-    const NUMERIC_COLUMNS = ['Beds', 'Baths', 'List Price', 'HOA Fee/mo', 'Days on Market'];
+    const NUMERIC_COLUMNS = [
+      'Rank', 'List Price', 'Est. Rent/mo',
+      '1% Ratio', 'Monthly Cash Flow', 'CoC Return'
+    ];
 
     let rawData = [];
     let filteredData = [];
-    let currentSort = { column: 'List Price', direction: 'asc' };
+    let currentSort = { column: 'Rank', direction: 'asc' };
 
     async function init() {
       try {
@@ -552,6 +576,10 @@
         const text = await res.text();
         rawData = parseCSV(text);
         if (!rawData.length) throw new Error('No data found in sheet.');
+
+        rawData.forEach((row, i) => {
+          if (!row['Rank']) row['_calc_rank'] = i + 1;
+        });
 
         populateCityFilter();
         updateStats();
@@ -576,12 +604,16 @@
       const el = document.getElementById('last-updated');
       const sample = rawData[0] || {};
       const dateVal = sample['Last Updated'] || sample['last_updated'] || sample['LastUpdated'];
-      el.textContent = dateVal ? 'Last updated: ' + dateVal : 'Last updated: Current issue';
+      if (dateVal) {
+        el.textContent = 'Last updated: ' + dateVal;
+      } else {
+        el.textContent = 'Last updated: Current issue';
+      }
     }
 
     function updateStats() {
       document.getElementById('stat-total').textContent = rawData.length;
-      const cities = new Set(rawData.map(r => r['City'] || r['Location'] || r['Zip'] || '').filter(Boolean));
+      const cities = new Set(rawData.map(r => r['City'] || r['Location'] || r['ZIP'] || r['Zip'] || r['County'] || '').filter(Boolean));
       document.getElementById('stat-cities').textContent = cities.size;
       const prices = rawData.map(r => parseNumber(r['List Price'])).filter(n => !isNaN(n));
       if (prices.length) {
@@ -591,10 +623,12 @@
     }
 
     function setupListeners() {
-      ['search','city','beds','max-hoa','max-price'].forEach(id => {
+      ['search','city','beds','min-ratio'].forEach(id => {
         const el = document.getElementById(id);
-        el.addEventListener('input', applyFilters);
-        el.addEventListener('change', applyFilters);
+        if (el) {
+          el.addEventListener('input', applyFilters);
+          el.addEventListener('change', applyFilters);
+        }
       });
     }
 
@@ -602,7 +636,7 @@
       const sel = document.getElementById('city');
       const cities = new Set();
       rawData.forEach(r => {
-        const loc = r['City'] || r['Location'] || r['ZIP'] || r['Zip'] || '';
+        const loc = r['City'] || r['Location'] || r['ZIP'] || r['Zip'] || r['County'] || '';
         if (loc) cities.add(loc.trim());
       });
       Array.from(cities).sort().forEach(city => {
@@ -616,30 +650,33 @@
       const q        = document.getElementById('search').value.toLowerCase().trim();
       const city     = document.getElementById('city').value;
       const beds     = document.getElementById('beds').value;
-      const maxHoa   = parseFloat(document.getElementById('max-hoa').value) || 0;
-      const maxPrice = parseFloat(document.getElementById('max-price').value) || 0;
+      
+      const minRatioEl = document.getElementById('min-ratio');
+      const minRatio = minRatioEl ? (parseFloat(minRatioEl.value) || 0) : 0;
 
       filteredData = rawData.filter(row => {
-        const loc = row['City'] || row['Location'] || row['ZIP'] || row['Zip'] || '';
+        const loc = row['City'] || row['Location'] || row['ZIP'] || row['Zip'] || row['County'] || '';
 
         if (q) {
-          const addr     = (row['Address'] || '').toLowerCase();
-          const building = (row['Building/Complex'] || '').toLowerCase();
-          const mls      = (row['MLS ID'] || row['MLS #'] || '').toLowerCase();
-          if (!addr.includes(q) && !building.includes(q) && !mls.includes(q)) return false;
+          const addr = (row['Address'] || '').toLowerCase();
+          const mls  = (row['MLS ID'] || row['MLS #'] || '').toLowerCase();
+          if (!addr.includes(q) && !mls.includes(q)) return false;
         }
         if (city && loc.trim() !== city) return false;
         if (beds) {
-          const b = parseNumber(row['Beds'] || (row['Beds/Baths'] || '').split('/')[0]);
-          if (beds === '4+' ? b < 4 : b !== parseInt(beds)) return false;
+          const bb = row['Beds/Baths'] || row['Beds'] || '';
+          const bMatch = String(bb).match(/(\d+)/);
+          const bNum = bMatch ? parseInt(bMatch[1]) : 0;
+          if (beds === '4+') {
+            if (bNum < 4) return false;
+          } else {
+            if (bNum !== parseInt(beds)) return false;
+          }
         }
-        if (maxHoa > 0) {
-          const h = parseNumber(row['HOA Fee/mo'] || row['HOA/mo']);
-          if (!isNaN(h) && h >= maxHoa) return false;
-        }
-        if (maxPrice > 0) {
-          const p = parseNumber(row['List Price']);
-          if (!isNaN(p) && p >= maxPrice) return false;
+        if (minRatio > 0) {
+          let r = parseNumber(row['1% Ratio']);
+          if (!String(row['1% Ratio'] || '').includes('%') && r < 0.2) r *= 100;
+          if (r < minRatio) return false;
         }
         return true;
       });
@@ -666,20 +703,25 @@
     }
 
     function getVal(row, col) {
-      if (col === 'MLS ID')         return row['MLS ID'] || row['MLS #'] || '';
-      if (col === 'Location')       return row['City'] || row['Location'] || row['ZIP'] || row['Zip'] || '';
-      if (col === 'HOA Fee/mo')     return row['HOA Fee/mo'] || row['HOA/mo'] || '';
-      if (col === 'Beds')           return row['Beds'] || (row['Beds/Baths'] || '').split('/')[0] || '';
-      if (col === 'Baths')          return row['Baths'] || (row['Beds/Baths'] || '').split('/')[1] || '';
-      if (col === 'Building/Complex') return row['Building/Complex'] || row['Building'] || '';
+      if (col === 'Address')          return row['Address'] || '';
+      if (col === 'Beds/Baths')       return row['Beds/Baths'] || (row['Beds'] ? `${row['Beds']}/${row['Baths'] || '?'}` : '');
+      if (col === 'List Price')       return row['List Price'] || row['Price ($)'] || '';
+      if (col === 'Est. Rent/mo')     return row['Est. Rent/mo'] || row['Est Rent/mo'] || row['Est. Monthly Rent'] || row['Est. Rent ($/mo)'] || '';
+      if (col === '1% Ratio')         return row['1% Ratio'] || '';
+      if (col === 'Monthly Cash Flow')return row['Monthly Cash Flow'] || row['Monthly CF'] || row['Net Cash Flow ($/mo)'] || '';
+      if (col === 'CoC Return')       return row['CoC Return'] || row['Cash on Cash'] || '';
+      if (col === 'Rank')             return row['Rank'] || row['_calc_rank'] || '';
       return row[col] || '';
     }
 
     function handleSort(col) {
-      currentSort.direction = currentSort.column === col
-        ? (currentSort.direction === 'asc' ? 'desc' : 'asc')
-        : 'asc';
-      currentSort.column = col;
+      if (col === '') return;
+      if (currentSort.column === col) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.column = col;
+        currentSort.direction = col === 'List Price' ? 'asc' : 'desc';
+      }
       sortData(); renderHeaders(); renderTable();
     }
 
@@ -689,6 +731,12 @@
       const tr = document.createElement('tr');
       DISPLAY_COLUMNS.forEach(col => {
         const th = document.createElement('th');
+        if (col === '') {
+          tr.appendChild(th);
+          return;
+        }
+        if (col === 'Beds/Baths') th.className = 'hide-mobile';
+        
         th.onclick = () => handleSort(col);
         const isSorted = currentSort.column === col;
         if (isSorted) th.classList.add('sorted');
@@ -713,51 +761,104 @@
       }
 
       let altCount = 0;
-      filteredData.forEach(row => {
+      filteredData.forEach((row, index) => {
         const tr = document.createElement('tr');
-        tr.className = altCount++ % 2 === 0 ? 'row-norm' : 'row-alt';
+        tr.className = 'main-row ' + (altCount++ % 2 === 0 ? 'row-norm' : 'row-alt');
+        
+        const rank = parseNumber(row['Rank'] || row['_calc_rank']);
+        const isTop3 = rank >= 1 && rank <= 3;
+        if (isTop3) tr.classList.add('row-top3');
 
         DISPLAY_COLUMNS.forEach(col => {
           const td = document.createElement('td');
+          if (col === '') {
+            td.className = 'chevron-cell';
+            td.innerHTML = '▸';
+            tr.appendChild(td);
+            return;
+          }
+          if (col === 'Beds/Baths') td.className = 'hide-mobile';
+
           let val = getVal(row, col);
 
           switch (col) {
-            case 'MLS ID': {
-              const url = row['Listing URL'] || row['Listing Link'] || '#';
-              td.innerHTML = url !== '#'
-                ? `<a href="${url}" target="_blank" rel="noopener" class="mls-link">${val || '—'}</a>`
-                : (val || '—');
+            case 'Rank':
+              td.innerHTML = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
               break;
-            }
+            case 'Address':
+              td.className = 'address-cell';
+              td.textContent = val;
+              break;
             case 'List Price':
-              td.innerHTML = `<span class="price-tag">${fmtPrice(val)}</span>`;
+              td.textContent = fmtPrice(val);
               break;
-            case 'HOA Fee/mo': {
-              const h = parseNumber(val);
-              const cls = !isNaN(h) && h >= 1000 ? 'hoa-high' : '';
-              td.innerHTML = `<span class="${cls}">${isNaN(h) ? '—' : '$'+h.toLocaleString('en-US',{maximumFractionDigits:0})+'/mo'}</span>`;
+            case 'Est. Rent/mo':
+              td.textContent = fmtRent(val);
               break;
-            }
-            case 'Days on Market': {
-              const dom = parseNumber(val);
-              if (isNaN(dom)) { td.textContent = '—'; break; }
-              td.innerHTML = dom > 60
-                ? `<span class="dom-high">${dom} days</span>`
-                : `${dom} days`;
+            case '1% Ratio': {
+              const num = parseRatio(val);
+              const cls = num >= 1.0 ? 'ratio-pass' : num >= 0.9 ? 'ratio-close' : 'ratio-miss';
+              td.innerHTML = `<span class="ratio-pill ${cls}">${isNaN(num) ? '—' : num.toFixed(2) + '%'}</span>`;
               break;
             }
-            case 'Beds':
-              td.innerHTML = val ? `<span class="beds-badge">${val} bd</span>` : '—';
+            case 'Monthly Cash Flow':
+              td.innerHTML = fmtCashFlow(val);
               break;
-            case 'Baths':
-              td.textContent = val ? val + ' ba' : '—';
+            case 'CoC Return':
+              td.innerHTML = fmtCoC(val);
               break;
             default:
               td.textContent = val || '—';
           }
           tr.appendChild(td);
         });
+
+        const detailTr = document.createElement('tr');
+        detailTr.className = 'detail-row';
+        
+        const zip = row['ZIP'] || row['Zip'] || '—';
+        const priceNum = parseNumber(getVal(row, 'List Price'));
+        const dp = !isNaN(priceNum) ? fmtPrice(priceNum * 0.25) : '—';
+        
+        const hoaRaw = row['HOA Fee/mo'] || row['HOA/mo'] || row['HOA'] || '';
+        const hoa = parseNumber(hoaRaw);
+        const hoaStr = isNaN(hoa) ? '—' : '$' + hoa.toLocaleString('en-US', {maximumFractionDigits:0}) + '/mo';
+        const hoaCls = hoa > 1000 ? 'hoa-high' : '';
+
+        const score = row['Score'] || row['Total Score'] || '—';
+        const lastUpd = row['Last Updated'] || row['last_updated'] || row['LastUpdated'] || '—';
+        const url = row['Listing URL'] || row['Listing Link'] || row['MLS Link'] || '#';
+        const urlBtn = url !== '#' ? `<a href="${url}" target="_blank" rel="noopener" class="view-btn">View Listing →</a>` : '';
+
+        const detailHtml = `
+          <td colspan="${DISPLAY_COLUMNS.length}">
+            <div class="detail-card">
+              <div class="detail-section">
+                <div class="detail-item"><span class="detail-label">ZIP Code</span><span class="detail-value">${zip}</span></div>
+                <div class="detail-item"><span class="detail-label">HOA/mo</span><span class="detail-value ${hoaCls}">${hoaStr}</span></div>
+                <div class="detail-item"><span class="detail-label">Est. Down Payment (25%)</span><span class="detail-value">${dp}</span></div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-item"><span class="detail-label">Total Score</span><span class="detail-value">${score}</span></div>
+                <div class="detail-item"><span class="detail-label">Last Updated</span><span class="detail-value">${lastUpd}</span></div>
+                <div style="text-align:right">${urlBtn}</div>
+              </div>
+            </div>
+          </td>
+        `;
+        detailTr.innerHTML = detailHtml;
+
+        tr.onclick = () => {
+          const wasOpen = detailTr.classList.contains('open');
+          document.querySelectorAll('.detail-row.open').forEach(el => { el.classList.remove('open'); el.previousElementSibling.classList.remove('expanded'); });
+          if (!wasOpen) {
+            detailTr.classList.add('open');
+            tr.classList.add('expanded');
+          }
+        };
+
         tbody.appendChild(tr);
+        tbody.appendChild(detailTr);
       });
 
       const rc = document.getElementById('result-count');
@@ -766,11 +867,16 @@
       }
     }
 
-    // ── UTILS ────────────────────────────────────────────────────
     function parseNumber(str) {
       if (!str && str !== 0) return NaN;
       if (typeof str === 'number') return str;
       return parseFloat(str.toString().replace(/[^0-9.-]+/g, ''));
+    }
+
+    function parseRatio(val) {
+      let n = parseNumber(val);
+      if (!String(val || '').includes('%') && n < 0.2) n *= 100;
+      return n;
     }
 
     function fmtPrice(val) {
@@ -778,7 +884,32 @@
       return isNaN(n) ? '—' : '$' + n.toLocaleString('en-US', {maximumFractionDigits:0});
     }
 
-    function parseCSV(text) {
+    function fmtRent(val) {
+      const n = parseNumber(val);
+      return isNaN(n) ? '—' : '$' + n.toLocaleString('en-US', {maximumFractionDigits:0}) + '/mo';
+    }
+
+    function fmtRatio(val) {
+      const n = parseRatio(val);
+      return isNaN(n) ? '—' : n.toFixed(2) + '%';
+    }
+
+    function fmtCashFlow(val) {
+      const n = parseNumber(val);
+      if (isNaN(n)) return '—';
+      const f = '$' + Math.abs(n).toLocaleString('en-US', {maximumFractionDigits:0}) + '/mo';
+      return n < 0 ? `<span class="cash-neg">−${f}</span>` : `<span class="cash-pos">+${f}</span>`;
+    }
+
+    function fmtCoC(val) {
+      let n = parseNumber(val);
+      if (!String(val || '').includes('%') && n < 0.2 && n > -0.2) n *= 100;
+      if (isNaN(n)) return '—';
+      const s = n.toFixed(1) + '%';
+      return n < 0 ? `<span class="cash-neg">${s}</span>` : `<span class="cash-pos">${s}</span>`;
+    }
+
+    function parseCSV(text) {    function parseCSV(text) {
       const rows = [];
       let row = [], val = '', inQ = false;
       for (let i = 0; i < text.length; i++) {
