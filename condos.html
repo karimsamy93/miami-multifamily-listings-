@@ -556,7 +556,7 @@
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1RI7Ngllmz1_aH4uVRlATEX-arxCLIPbSbZK5tRJEaAc/gviz/tq?tqx=out:csv&sheet=PUBLISH";
 
     const DISPLAY_COLUMNS = [
-      'Rank', 'Address', 'Beds/Baths', 'List Price', 'Est. Rent/mo',
+      'Rank', 'MLS #', 'Address', 'Beds/Baths', 'List Price', 'Est. Rent/mo',
       '1% Ratio', 'Monthly Cash Flow', 'CoC Return', ''
     ];
 
@@ -703,6 +703,7 @@
     }
 
     function getVal(row, col) {
+      if (col === 'MLS #')            return row['MLS #'] || row['MLS ID'] || row['MLS'] || '';
       if (col === 'Address')          return row['Address'] || '';
       if (col === 'Beds/Baths')       return row['Beds/Baths'] || (row['Beds'] ? `${row['Beds']}/${row['Baths'] || '?'}` : '');
       if (col === 'List Price')       return row['List Price'] || row['Price ($)'] || '';
@@ -784,6 +785,9 @@
           switch (col) {
             case 'Rank':
               td.innerHTML = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+              break;
+            case 'MLS #':
+              td.textContent = val || '—';
               break;
             case 'Address':
               td.className = 'address-cell';
@@ -909,7 +913,7 @@
       return n < 0 ? `<span class="cash-neg">${s}</span>` : `<span class="cash-pos">${s}</span>`;
     }
 
-    function parseCSV(text) {    function parseCSV(text) {
+    function parseCSV(text) {
       const rows = [];
       let row = [], val = '', inQ = false;
       for (let i = 0; i < text.length; i++) {

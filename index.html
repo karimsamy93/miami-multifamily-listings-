@@ -556,7 +556,7 @@
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/17BAkeOqoqJ2yGbdlP9g7Rw618ZERKWY0mOtQanSYcrU/gviz/tq?tqx=out:csv&sheet=PUBLISH";
 
     const DISPLAY_COLUMNS = [
-      'Rank', 'Address', 'Type & Units', 'List Price', 'Est. Rent/mo',
+      'Rank', 'MLS #', 'Address', 'Type & Units', 'List Price', 'Est. Rent/mo',
       '1% Ratio', 'Monthly Cash Flow', 'CoC Return', ''
     ];
 
@@ -701,6 +701,7 @@
     }
 
     function getVal(row, col) {
+      if (col === 'MLS #')            return row['MLS #'] || row['MLS ID'] || row['MLS'] || '';
       if (col === 'Address')          return row['Address'] || '';
       if (col === 'Type & Units')     return row['Type & Units'] || (row['Type'] ? `${row['Type']} (${row['Units'] || '?'})` : '');
       if (col === 'List Price')       return row['List Price'] || row['Price ($)'] || '';
@@ -775,13 +776,14 @@
             tr.appendChild(td);
             return;
           }
-          if (col === 'Type & Units') td.className = 'hide-mobile';
-
           let val = getVal(row, col);
 
           switch (col) {
             case 'Rank':
               td.innerHTML = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+              break;
+            case 'MLS #':
+              td.textContent = val || '—';
               break;
             case 'Address':
               td.className = 'address-cell';
@@ -813,7 +815,7 @@
 
         const detailTr = document.createElement('tr');
         detailTr.className = 'detail-row';
-        
+
         const zip = row['ZIP'] || row['Zip'] || '—';
         const county = row['County'] || '—';
         const priceNum = parseNumber(getVal(row, 'List Price'));
