@@ -874,7 +874,11 @@
     function parseNumber(str) {
       if (!str && str !== 0) return NaN;
       if (typeof str === 'number') return str;
-      return parseFloat(str.toString().replace(/[^0-9.-]+/g, ''));
+      const s = str.toString();
+      const isNeg = (s.includes('(') && s.includes(')')) || s.includes('-');
+      let n = parseFloat(s.replace(/[^0-9.-]+/g, ''));
+      if (isNeg && n > 0) n = -n;
+      return n;
     }
 
     function parseRatio(val) {
@@ -938,6 +942,9 @@
       }
 
       const headers = rows[hIdx].map(h => h.trim());
+      if (headers[0] && headers[0].includes('MLS')) {
+        headers[0] = headers[0].includes('MLS #') ? 'MLS #' : 'MLS ID';
+      }
       return rows.slice(hIdx + 1)
         .filter(r => r.filter(v => v.trim()).length > 1)
         .map(r => Object.fromEntries(headers.map((h, j) => [h, (r[j] || '').trim()])));
