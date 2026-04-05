@@ -292,6 +292,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
+      table-layout: fixed;
       white-space: nowrap;
       font-size: 0.88rem;
     }
@@ -788,9 +789,11 @@
 
           switch (col) {
             case 'Rank':
+              td.style.width = '48px'; td.style.maxWidth = '48px';
               td.innerHTML = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
               break;
             case 'MLS #': {
+              td.style.width = '110px'; td.style.maxWidth = '110px';
               const mlsUrl = row['Listing URL'] || row['Listing Link'] || row['MLS Link'] || '';
               td.style.textAlign = 'center';
               if (mlsUrl && mlsUrl !== '#') {
