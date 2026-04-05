@@ -310,6 +310,7 @@
       position: sticky;
       top: 0;
       white-space: nowrap;
+      text-align: center;
     }
 
     thead th:hover { background: #ECF0EF; }
@@ -327,6 +328,7 @@
       padding: 0.85rem 1rem;
       border-bottom: 1px solid #F3F4F6;
       vertical-align: middle;
+      text-align: center;
     }
 
     tbody tr:last-child td { border-bottom: none; }
@@ -389,6 +391,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      text-align: left;
     }
 
     .cash-neg { color: #DC2626; font-weight: 600; }
@@ -560,6 +563,12 @@
       '1% Ratio', 'Monthly Cash Flow', 'CoC Return', ''
     ];
 
+    // MLS IDs excluded due to data anomalies — never shown on website
+    const EXCLUDED_MLS_IDS = new Set([
+      'A11947369', // rent $36,000/mo on $729K duplex — likely annual figure in monthly field
+      'A11975757'  // rent $16,173,120/mo on $635K triplex — formatting error in source CSV
+    ]);
+
     const NUMERIC_COLUMNS = [
       'Rank', 'List Price', 'Est. Rent/mo',
       '1% Ratio', 'Monthly Cash Flow', 'CoC Return'
@@ -567,7 +576,7 @@
 
     let rawData = [];
     let filteredData = [];
-    let currentSort = { column: 'Rank', direction: 'asc' };
+    let currentSort = { column: '1% Ratio', direction: 'desc' };
 
     async function init() {
       try {
@@ -577,6 +586,12 @@
         rawData = parseCSV(text);
 
         if (rawData.length === 0) throw new Error('No data found in sheet.');
+
+        // Filter out excluded MLS IDs (data anomalies)
+        rawData = rawData.filter(row => {
+          const mls = (row['MLS #'] || row['MLS ID'] || row['MLS'] || '').trim();
+          return !EXCLUDED_MLS_IDS.has(mls);
+        });
 
         rawData.forEach((row, i) => {
           if (!row['Rank']) row['_calc_rank'] = i + 1;
@@ -782,9 +797,16 @@
             case 'Rank':
               td.innerHTML = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
               break;
-            case 'MLS #':
-              td.textContent = val || '—';
+            case 'MLS #': {
+              const mlsUrl = row['Listing URL'] || row['Listing Link'] || row['MLS Link'] || '';
+              td.style.textAlign = 'center';
+              if (mlsUrl && mlsUrl !== '#') {
+                td.innerHTML = `<a href="${mlsUrl}" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600;text-decoration:none;white-space:nowrap;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${val || '—'}</a>`;
+              } else {
+                td.textContent = val || '—';
+              }
               break;
+            }
             case 'Address':
               td.className = 'address-cell';
               td.textContent = val;

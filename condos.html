@@ -309,6 +309,7 @@
       user-select: none;
       position: sticky;
       top: 0;
+      text-align: center;
     }
 
     thead th:hover { background: #ECF0EF; }
@@ -325,6 +326,7 @@
       padding: 0.85rem 1rem;
       border-bottom: 1px solid #F3F4F6;
       vertical-align: middle;
+      text-align: center;
     }
 
     tbody tr:last-child td { border-bottom: none; }
@@ -383,6 +385,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      text-align: left;
     }
     
     .hoa-high { color: #DC2626; font-weight: 600; }
@@ -567,7 +570,7 @@
 
     let rawData = [];
     let filteredData = [];
-    let currentSort = { column: 'Rank', direction: 'asc' };
+    let currentSort = { column: '1% Ratio', direction: 'desc' };
 
     async function init() {
       try {
@@ -786,9 +789,16 @@
             case 'Rank':
               td.innerHTML = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
               break;
-            case 'MLS #':
-              td.textContent = val || '—';
+            case 'MLS #': {
+              const mlsUrl = row['Listing URL'] || row['Listing Link'] || row['MLS Link'] || '';
+              td.style.textAlign = 'center';
+              if (mlsUrl && mlsUrl !== '#') {
+                td.innerHTML = `<a href="${mlsUrl}" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600;text-decoration:none;white-space:nowrap;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${val || '—'}</a>`;
+              } else {
+                td.textContent = val || '—';
+              }
               break;
+            }
             case 'Address':
               td.className = 'address-cell';
               td.textContent = val;
