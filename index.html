@@ -556,7 +556,7 @@
     // ★  UPDATE THIS URL after publishing your Google Sheet as CSV
     //    File → Share → Publish to web → Sheet → CSV → Copy link
     // ============================================================
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1NyFxGFBojD8m9qS367JtZoby8jO66WLnB8mKGMirnOA/gviz/tq?tqx=out:csv&sheet=PUBLISH";
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1Vtclz_GikTvDVsqjBe7lKefWiUW28oE0gwuRYIdGLxg/gviz/tq?tqx=out:csv&sheet=PUBLISH";
 
     const DISPLAY_COLUMNS = [
       'Rank', 'MLS #', 'Address', 'Type & Units', 'List Price', 'Est. Rent/mo',
@@ -926,11 +926,10 @@
       return n < 0 ? `<span class="cash-neg">${s}</span>` : `<span class="cash-pos">${s}</span>`;
     }
 
-    // ── CSV PARSER ───────────────────────────────────────────────
+    // -- CSV PARSER
     function parseCSV(text) {
       const rows = [];
       let row = [], val = '', inQ = false;
-
       for (let i = 0; i < text.length; i++) {
         const c = text[i];
         if (inQ) {
@@ -947,16 +946,28 @@
       if (val || row.length) { row.push(val); rows.push(row); }
       if (!rows.length) return [];
 
-      // Find header row (first with 5+ non-empty cols)
+      // Skip title/subtitle rows at top of PUBLISH sheet.
+      // Real header row: first cell is 'MLS #' or 'MLS ID',
+      // or row has 5+ non-empty cells with a short first cell.
       let hIdx = 0;
-      for (let i = 0; i < Math.min(rows.length, 5); i++) {
-        if (rows[i].filter(v => v.trim()).length >= 5) { hIdx = i; break; }
+      for (let i = 0; i < Math.min(rows.length, 6); i++) {
+        const first = (rows[i][0] || '').trim();
+        const nonEmpty = rows[i].filter(v => v.trim()).length;
+        if (first === 'MLS #' || first === 'MLS ID' || first === 'MLS') { hIdx = i; break; }
+        if (nonEmpty >= 5 && first.length < 20) { hIdx = i; break; }
       }
 
-      const headers = rows[hIdx].map(h => h.trim());
+      // If title text was merged into first header cell, clean it
+      const rawHeaders = rows[hIdx].map(h => h.trim());
+      if (rawHeaders[0] && rawHeaders[0] !== 'MLS #' && rawHeaders[0].includes('MLS #')) {
+        rawHeaders[0] = 'MLS #';
+      } else if (rawHeaders[0] && rawHeaders[0] !== 'MLS ID' && rawHeaders[0].includes('MLS ID')) {
+        rawHeaders[0] = 'MLS ID';
+      }
+
       return rows.slice(hIdx + 1)
         .filter(r => r.filter(v => v.trim()).length > 1)
-        .map(r => Object.fromEntries(headers.map((h, j) => [h, (r[j] || '').trim()])));
+        .map(r => Object.fromEntries(rawHeaders.map((h, j) => [h, (r[j] || '').trim()])));
     }
 
     // ── START ─────────────────────────────────────────────────────

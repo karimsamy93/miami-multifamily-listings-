@@ -556,7 +556,7 @@
     // ★  UPDATE THIS URL after publishing your Google Sheet as CSV
     //    File → Share → Publish to web → Sheet (Condos) → CSV → Copy link
     // ============================================================
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1U6pfUFxMe8vaXJjSGaNXfy_GBdYDm1O3BVLKQo_z0Ug/gviz/tq?tqx=out:csv&sheet=PUBLISH";
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1QcAy-bR-j1qrarI_le4SleUlZI0cgbBj0jKiWDvKDEk/gviz/tq?tqx=out:csv&sheet=PUBLISH";
 
     const DISPLAY_COLUMNS = [
       'Rank', 'MLS #', 'Address', 'Beds/Baths', 'List Price', 'Est. Rent/mo',
@@ -923,6 +923,7 @@
       return n < 0 ? `<span class="cash-neg">${s}</span>` : `<span class="cash-pos">${s}</span>`;
     }
 
+    // -- CSV PARSER
     function parseCSV(text) {
       const rows = [];
       let row = [], val = '', inQ = false;
@@ -942,22 +943,22 @@
       if (val || row.length) { row.push(val); rows.push(row); }
       if (!rows.length) return [];
 
-      // Find real header row — skip title/subtitle rows at top of PUBLISH sheet
+      // Skip title/subtitle rows at top of PUBLISH sheet.
+      // Real header row: first cell is 'MLS #' or 'MLS ID',
+      // or row has 5+ non-empty cells with a short first cell.
       let hIdx = 0;
       for (let i = 0; i < Math.min(rows.length, 6); i++) {
-        const firstCell = (rows[i][0] || '').trim();
+        const first = (rows[i][0] || '').trim();
         const nonEmpty = rows[i].filter(v => v.trim()).length;
-        if (firstCell === 'MLS #' || firstCell === 'MLS ID' || firstCell === 'MLS') {
-          hIdx = i; break;
-        }
-        if (nonEmpty >= 5 && firstCell.length < 20) { hIdx = i; break; }
+        if (first === 'MLS #' || first === 'MLS ID' || first === 'MLS') { hIdx = i; break; }
+        if (nonEmpty >= 5 && first.length < 20) { hIdx = i; break; }
       }
 
+      // If title text was merged into first header cell, clean it
       const rawHeaders = rows[hIdx].map(h => h.trim());
-      if (rawHeaders[0] && rawHeaders[0].includes('MLS #') && rawHeaders[0] !== 'MLS #') {
+      if (rawHeaders[0] && rawHeaders[0] !== 'MLS #' && rawHeaders[0].includes('MLS #')) {
         rawHeaders[0] = 'MLS #';
-      }
-      if (rawHeaders[0] && rawHeaders[0].includes('MLS ID') && rawHeaders[0] !== 'MLS ID') {
+      } else if (rawHeaders[0] && rawHeaders[0] !== 'MLS ID' && rawHeaders[0].includes('MLS ID')) {
         rawHeaders[0] = 'MLS ID';
       }
 
