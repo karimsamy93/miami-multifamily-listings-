@@ -291,8 +291,8 @@
 
     table {
       width: 100%;
+      min-width: 700px;
       border-collapse: collapse;
-      table-layout: fixed;
       white-space: nowrap;
       font-size: 0.88rem;
     }
@@ -751,8 +751,8 @@
         }
         if (col === 'Type & Units') th.className = 'hide-mobile';
         
-        if (col === 'Rank') { th.style.width = '48px'; th.style.minWidth = '48px'; }
-        if (col === 'MLS #') { th.style.width = '100px'; th.style.minWidth = '100px'; }
+        if (col === 'Rank') { th.style.width = '44px'; th.style.minWidth = '44px'; th.style.maxWidth = '44px'; }
+        if (col === 'MLS #') { th.style.width = '108px'; th.style.minWidth = '108px'; th.style.maxWidth = '108px'; }
         th.onclick = () => handleSort(col);
         const isSorted = currentSort.column === col;
         if (isSorted) th.classList.add('sorted');
@@ -797,11 +797,9 @@
 
           switch (col) {
             case 'Rank':
-              td.style.width = '48px'; td.style.maxWidth = '48px';
               td.innerHTML = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
               break;
             case 'MLS #': {
-              td.style.width = '110px'; td.style.maxWidth = '110px';
               const mlsUrl = row['Listing URL'] || row['Listing Link'] || row['MLS Link'] || '';
               td.style.textAlign = 'center';
               if (mlsUrl && mlsUrl !== '#') {
