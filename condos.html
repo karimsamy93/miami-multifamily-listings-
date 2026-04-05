@@ -942,15 +942,28 @@
       if (val || row.length) { row.push(val); rows.push(row); }
       if (!rows.length) return [];
 
+      // Find real header row — skip title/subtitle rows at top of PUBLISH sheet
       let hIdx = 0;
-      for (let i = 0; i < Math.min(rows.length, 5); i++) {
-        if (rows[i].filter(v => v.trim()).length >= 5) { hIdx = i; break; }
+      for (let i = 0; i < Math.min(rows.length, 6); i++) {
+        const firstCell = (rows[i][0] || '').trim();
+        const nonEmpty = rows[i].filter(v => v.trim()).length;
+        if (firstCell === 'MLS #' || firstCell === 'MLS ID' || firstCell === 'MLS') {
+          hIdx = i; break;
+        }
+        if (nonEmpty >= 5 && firstCell.length < 20) { hIdx = i; break; }
       }
 
-      const headers = rows[hIdx].map(h => h.trim());
+      const rawHeaders = rows[hIdx].map(h => h.trim());
+      if (rawHeaders[0] && rawHeaders[0].includes('MLS #') && rawHeaders[0] !== 'MLS #') {
+        rawHeaders[0] = 'MLS #';
+      }
+      if (rawHeaders[0] && rawHeaders[0].includes('MLS ID') && rawHeaders[0] !== 'MLS ID') {
+        rawHeaders[0] = 'MLS ID';
+      }
+
       return rows.slice(hIdx + 1)
         .filter(r => r.filter(v => v.trim()).length > 1)
-        .map(r => Object.fromEntries(headers.map((h, j) => [h, (r[j] || '').trim()])));
+        .map(r => Object.fromEntries(rawHeaders.map((h, j) => [h, (r[j] || '').trim()])));
     }
 
     init();
