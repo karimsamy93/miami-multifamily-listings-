@@ -573,12 +573,12 @@
     let filteredData = [];
     let currentSort = { column: '1% Ratio', direction: 'desc' };
 
-        async function init() {
+            async function init() {
       try {
-      const resp = await fetch(SHEET_CSV_URL);
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const csv = await resp.text();
-      rawData = parseCSV(csv);
+        const resp = await fetch(SHEET_CSV_URL);
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const csv = await resp.text();
+        rawData = parseCSV(csv);
         if (!rawData.length) throw new Error('No data found.');
 
         rawData.forEach((row, i) => {
