@@ -3,84 +3,516 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Miami Multifamily Listings — Miami Multifamily Minute</title>
-  <link rel="icon" href="Favicon-01.png">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Multifamily Listings — Miami Multifamily Minute</title>
+  <meta name="description" content="Scored & ranked South Florida 2–4 unit multifamily investment listings, updated every 2 weeks by Miami Multifamily Minute.">
+  <!-- Favicon: upload Favicon-01.png to your GitHub repo root alongside this file -->
+  <link rel="icon" type="image/png" href="Favicon-01.png">
+  <link rel="apple-touch-icon" href="Favicon-01.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root { --primary:#04443C; --accent:#F5A623; --text:#1A1A1A; --bg:#FFFFFF; --highlight:#F0F9F7; --border:#E5E7EB; }
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'Inter',Arial,sans-serif; color:var(--text); background:var(--bg); line-height:1.5; }
-    header { background:var(--primary); color:white; padding:2rem 1rem; position:relative; }
-    .header-content { max-width:1100px; margin:0 auto; display:flex; flex-direction:column; gap:0.5rem; }
-    .header-content p { color:#E0E7E6; font-size:1.1rem; }
-    .last-updated { font-size:0.9rem; color:#A0BDB9; margin-top:0.5rem; }
-    .nav-link { position:absolute; top:2rem; right:max(1rem,calc((100vw - 1100px)/2)); color:white; text-decoration:none; font-weight:500; }
-    @media(max-width:768px){ .nav-link { position:static; display:inline-block; margin-top:1rem; } }
-    main { max-width:1100px; margin:2rem auto; padding:0 1rem; }
-    .stats-bar { display:flex; gap:2rem; margin-bottom:1.5rem; flex-wrap:wrap; }
-    .stat { display:flex; flex-direction:column; }
-    .stat-value { font-size:1.5rem; font-weight:700; color:var(--primary); }
-    .stat-label { font-size:0.8rem; color:#6B7280; text-transform:uppercase; letter-spacing:0.05em; }
-    .filters { display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem; align-items:flex-end; }
-    .filter-group { display:flex; flex-direction:column; gap:0.25rem; flex:1; min-width:140px; }
-    .filter-group label { font-size:0.85rem; font-weight:600; color:#4B5563; }
-    .filter-group input,.filter-group select { padding:0.5rem; border:1px solid var(--border); border-radius:4px; font-family:inherit; font-size:0.95rem; }
-    .result-count { font-size:0.9rem; color:#6B7280; margin-bottom:1rem; }
-    .result-count strong { color:var(--primary); }
-    .table-container { width:100%; overflow-x:auto; box-shadow:0 1px 3px rgba(0,0,0,0.1); border-radius:8px; border:1px solid var(--border); }
-    table { width:100%; border-collapse:collapse; text-align:left; white-space:nowrap; }
-    th { background:#F9FAFB; padding:0.75rem 1rem; font-weight:600; color:#374151; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; border-bottom:2px solid var(--border); cursor:pointer; user-select:none; }
-    th:hover { background:#F3F4F6; }
-    .sort-icon { display:inline-block; width:1em; text-align:center; color:#9CA3AF; }
-    td { padding:0.85rem 1rem; border-bottom:1px solid var(--border); font-size:0.9rem; }
-    tbody tr:hover { background:#F9FAFB; }
-    tbody tr.alt-row { background:#FAFAFA; }
-    tbody tr.top-3 { background:var(--highlight) !important; border-left:3px solid var(--primary); }
-    tbody tr.top-3 td:first-child { padding-left:calc(1rem - 3px); }
-    .mls-link { color:var(--primary); text-decoration:none; font-weight:600; }
-    .mls-link:hover { text-decoration:underline; }
-    .ratio-pill { display:inline-block; padding:0.15rem 0.5rem; border-radius:9999px; font-size:0.8rem; font-weight:700; }
-    .ratio-pass { background:#D1FAE5; color:#065F46; }
-    .ratio-close { background:#FEF3C7; color:#92400E; }
-    .ratio-miss { background:#FEE2E2; color:#991B1B; }
-    .negative { color:#DC2626; font-weight:600; }
-    .positive { color:#16A34A; font-weight:600; }
-    footer { text-align:center; padding:3rem 1rem; margin-top:2rem; border-top:1px solid var(--border); color:#6B7280; font-size:0.9rem; }
-    footer a { color:var(--primary); text-decoration:none; font-weight:600; }
-    .loading-container { text-align:center; padding:3rem; color:#6B7280; }
-    .spinner { display:inline-block; width:40px; height:40px; border:3px solid rgba(4,68,60,0.1); border-radius:50%; border-top-color:var(--primary); animation:spin 1s ease-in-out infinite; margin-bottom:1rem; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    .error { color:#DC2626; background:#FEE2E2; padding:1rem; border-radius:4px; border:1px solid #F87171; text-align:center; margin:2rem 0; }
-    @media(max-width:640px){ .hide-mobile { display:none !important; } td,th { padding:0.6rem 0.5rem; font-size:0.82rem; } }
+    /* ============================================================
+       CONFIGURATION — update SHEET_CSV_URL in the script block below
+       ============================================================ */
+
+    :root {
+      --green:       #04443C;
+      --green-dark:  #022E28;
+      --green-light: #F0F9F7;
+      --green-mid:   #0A6B5E;
+      --gold:        #F5A623;
+      --gold-light:  #FFF8EC;
+      --gold-border: #FDE68A;
+      --text:        #1A1A1A;
+      --text-muted:  #6B7280;
+      --border:      #E5E7EB;
+      --bg:          #F8F9FA;
+      --white:       #FFFFFF;
+      --red:         #DC2626;
+      --blue:        #1D6ED8;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    header {
+      background: var(--green);
+      background-image:
+        radial-gradient(ellipse at 80% 50%, rgba(10,107,94,0.6) 0%, transparent 60%),
+        radial-gradient(ellipse at 10% 80%, rgba(2,46,40,0.8) 0%, transparent 50%);
+      color: var(--white);
+      padding: 2.5rem 1.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), transparent 70%);
+    }
+
+    .header-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .header-left { flex: 1; min-width: 260px; }
+
+    .header-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+    }
+
+    .header-eyebrow span { opacity: 0.6; color: var(--white); }
+
+    .site-logo {
+      height: 56px;
+      width: auto;
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+
+    header h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(1.7rem, 4vw, 2.4rem);
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    .header-sub {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.65);
+    }
+
+    #last-updated {
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.45);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    #last-updated::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.75rem;
+      padding-top: 0.25rem;
+    }
+
+    .nav-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--white);
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.45rem 1rem;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-pill:hover {
+      background: rgba(255,255,255,0.18);
+      border-color: rgba(255,255,255,0.35);
+    }
+
+    .newsletter-link {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.4);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .newsletter-link:hover { color: var(--gold); }
+
+    @media (max-width: 640px) {
+      .header-right { align-items: flex-start; }
+    }
+
+    /* ── STATS BAR ───────────────────────────────────────────── */
+    .stats-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1.5rem;
+    }
+
+    .stats-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: var(--green);
+      font-size: 0.9rem;
+    }
+
+    .stat-sep { color: var(--border); font-size: 1.2rem; }
+
+    /* ── MAIN LAYOUT ─────────────────────────────────────────── */
+    main {
+      max-width: 1140px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── FILTERS ─────────────────────────────────────────────── */
+    .filters-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .filter-group.wide { min-width: 200px; flex: 2; }
+
+    .filter-group label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .filter-group input,
+    .filter-group select {
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      background: var(--white);
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .filter-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      padding-right: 2.2rem;
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(4,68,60,0.08);
+    }
+
+    .result-count {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      align-self: center;
+      white-space: nowrap;
+      padding-bottom: 0.1rem;
+    }
+
+    .result-count strong { color: var(--green); }
+
+    /* ── TABLE ───────────────────────────────────────────────── */
+    .table-wrap {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    .table-scroll { width: 100%; overflow-x: auto; }
+
+    table {
+      width: 100%;
+      min-width: 700px;
+      border-collapse: collapse;
+      white-space: nowrap;
+      font-size: 0.88rem;
+    }
+
+    thead th {
+      background: #F4F6F5;
+      padding: 0.85rem 1rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #4B5563;
+      border-bottom: 2px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      position: sticky;
+      top: 0;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    thead th:hover { background: #ECF0EF; }
+
+    thead th.sorted { color: var(--green); }
+
+    .sort-arrow {
+      display: inline-block;
+      margin-left: 4px;
+      color: var(--gold);
+      font-size: 0.8em;
+    }
+
+    tbody td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid #F3F4F6;
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    tbody tr { transition: background 0.1s; }
+    tbody tr:hover td { background: rgba(4,68,60,0.03) !important; }
+
+    /* ── HYBRID TABLE & DETAIL CARD ──────────────────────────── */
+    tbody tr.main-row { cursor: pointer; transition: background 0.1s; }
+    tbody tr.main-row:hover td { background: rgba(4,68,60,0.03) !important; }
+    tbody tr.row-alt { background: #FAFAFA; }
+    tbody tr.row-norm { background: var(--white); }
+
+    tbody tr.row-top3 { background: #F0F9F7 !important; }
+    tbody tr.row-top3 td:first-child {
+      border-left: 3px solid #04443C;
+      padding-left: calc(1rem - 3px);
+    }
+
+    .chevron-cell {
+      width: 40px; text-align: center; color: var(--gold);
+      font-size: 1.2rem; transition: transform 0.2s;
+    }
+    tr.expanded .chevron-cell { transform: rotate(90deg); }
+
+    .detail-row { display: none; }
+    .detail-row.open { display: table-row; }
+    .detail-row td { padding: 0 !important; border-bottom: 2px solid var(--border) !important; border-top: 1px solid rgba(0,0,0,0.05); }
+    
+    .detail-card {
+      background: #F0F9F7;
+      border-left: 3px solid #04443C;
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      box-shadow: inset 0 3px 6px rgba(0,0,0,0.02);
+    }
+    
+    .detail-section { display: flex; flex-direction: column; gap: 0.8rem; }
+    .detail-item {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.85rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .detail-label { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; }
+    .detail-value { font-weight: 600; color: var(--text); }
+    
+    .view-btn {
+      display: inline-flex; justify-content: center; align-items: center;
+      background: #04443C; color: var(--white);
+      text-decoration: none; padding: 0.7rem 1.2rem; border-radius: 6px;
+      font-weight: 600; font-size: 0.85rem; margin-top: 0.5rem;
+      transition: opacity 0.2s;
+    }
+    .view-btn:hover { opacity: 0.9; color: var(--white); }
+
+    /* Cell styles */
+    .address-cell {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    .cash-neg { color: #DC2626; font-weight: 600; }
+    .cash-pos { color: #16A34A; font-weight: 600; }
+
+    .ratio-pill {
+      display: inline-flex; justify-content: center; align-items: center;
+      padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.78rem; font-weight: 700;
+      min-width: 60px;
+    }
+    .ratio-pass { background: #D1FAE5; color: #065F46; }
+    .ratio-close { background: #FEF3C7; color: #92400E; }
+    .ratio-miss  { background: #FEE2E2; color: #991B1B; }
+
+    /* Empty / Loading / Error */
+    .state-box { text-align: center; padding: 4rem 2rem; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(4,68,60,0.12);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .state-box p { color: var(--text-muted); font-size: 0.95rem; }
+
+    .error-box {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: var(--red);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center; padding: 2.5rem 1.5rem 3rem;
+      margin-top: 2rem; border-top: 1px solid var(--border);
+      font-size: 0.82rem; color: var(--text-muted);
+    }
+    footer a { color: var(--green); font-weight: 600; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    .footer-disclaimer { margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.7; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hide-mobile { display: none !important; }
+      .detail-card { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; }
+      .filter-group { min-width: 100%; }
+      main { padding: 0 1rem; }
+      .filters-card { padding: 1rem; flex-direction: column; align-items: stretch; }
+      .stats-bar { padding: 0.75rem 1rem; }
+      .stats-inner { gap: 1rem; }
+    }
   </style>
 </head>
 <body>
+
   <header>
-    <div class="header-content">
-      <img src="Logo-01.png" alt="Miami Multifamily Minute" style="height:48px;width:auto;display:block;margin-bottom:0.5rem;">
-      <p>Scored &amp; ranked by the 1% Rule — 2–4 unit properties across South Florida</p>
-      <div id="last-updated" class="last-updated">Loading...</div>
-    </div>
-    <a href="condos.html" class="nav-link">View Condo Listings &rarr;</a>
-  </header>
-  <main>
-    <div id="loading" class="loading-container">
-      <div class="spinner"></div><div>Loading listings...</div>
-    </div>
-    <div id="app" style="display:none;">
-      <div class="stats-bar">
-        <div class="stat"><span class="stat-value" id="total-count">—</span><span class="stat-label">Total Listings</span></div>
-        <div class="stat"><span class="stat-value" id="pass-count">—</span><span class="stat-label">Passing 1% Rule</span></div>
-        <div class="stat"><span class="stat-value" id="avg-score">—</span><span class="stat-label">Avg. Score</span></div>
+    <div class="header-inner">
+      <div class="header-left">
+        <!-- Logo — upload Logo-01.png to your GitHub repo root alongside this file -->
+        <img src="Logo-01.png" alt="Miami Multifamily Minute" class="site-logo">
+        <p class="header-sub">Scored &amp; ranked by the 1% Rule &mdash; 2–4 unit properties across South Florida</p>
+        <div id="last-updated">Loading data...</div>
       </div>
-      <div class="filters">
-        <div class="filter-group" style="min-width:200px;">
+      <div class="header-right">
+        <a href="condos.html" class="nav-pill">View Condo Listings →</a>
+        <a href="https://miamimultifamilymin.com" target="_blank" class="newsletter-link">← Back to Newsletter</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div class="stat-item">
+        <span>Total listings:</span>
+        <span class="stat-value" id="stat-total">—</span>
+      </div>
+      <span class="stat-sep">|</span>
+      <div class="stat-item">
+        <span>Passing 1% Rule:</span>
+        <span class="stat-value" id="stat-passing">—</span>
+      </div>
+      <span class="stat-sep">|</span>
+      <div class="stat-item">
+        <span>Avg. score:</span>
+        <span class="stat-value" id="stat-avg-score">—</span>
+      </div>
+      <span class="stat-sep">|</span>
+      <div class="stat-item">
+        <span>Updated every 2 weeks</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Loading state -->
+    <div id="loading" class="state-box">
+      <div class="spinner"></div>
+      <p>Loading listings...</p>
+    </div>
+
+    <!-- App (shown after data loads) -->
+    <div id="app" style="display:none">
+
+      <div class="filters-card">
+        <div class="filter-group wide">
           <label for="search">Search</label>
           <input type="text" id="search" placeholder="Address or MLS ID...">
         </div>
         <div class="filter-group">
           <label for="city">Location</label>
-          <select id="city"><option value="">All Locations</option></select>
+          <select id="city">
+            <option value="">All Locations</option>
+          </select>
         </div>
         <div class="filter-group">
           <label for="units">Units</label>
@@ -97,186 +529,450 @@
             <option value="">Any</option>
             <option value="0.90">0.90%+</option>
             <option value="0.95">0.95%+</option>
-            <option value="1.00">1.00%+</option>
+            <option value="1.00">1.00%+ ✓</option>
           </select>
         </div>
+        <div class="result-count" id="result-count"></div>
       </div>
-      <div class="result-count">Showing <strong id="showing-count">0</strong> listings</div>
-      <div class="table-container">
-        <table>
-          <thead><tr id="table-head"></tr></thead>
-          <tbody id="table-body"></tbody>
-        </table>
+
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
       </div>
-    </div>
+
+    </div><!-- /#app -->
   </main>
+
   <footer>
-    <p>Updated every 2 weeks &nbsp;&middot;&nbsp; <a href="https://miamimultifamilymin.com" target="_blank">Miami Multifamily Minute</a></p>
-    <p style="margin-top:0.5rem;">Not financial advice. For informational purposes only.</p>
+    <div>Powered by <a href="https://miamimultifamilymin.com" target="_blank">Miami Multifamily Minute</a> &mdash; written by Karim Samy</div>
+    <div class="footer-disclaimer">Not financial advice. For informational purposes only. Data updated every 2 weeks.</div>
   </footer>
+
   <script>
+    // ============================================================
+    // ★  UPDATE THIS URL after publishing your Google Sheet as CSV
+    //    File → Share → Publish to web → Sheet → CSV → Copy link
+    // ============================================================
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1syMTJ8nJTbTlyn6puSEBFawhIajnrNJ3TIIiLuGyzS0/gviz/tq?tqx=out:csv&sheet=PUBLISH";
 
-    const DISPLAY_COLUMNS = ['Rank','MLS #','Address','Type & Units','List Price','Est. Rent/mo','1% Ratio','Monthly Cash Flow','CoC Return'];
-    const MOBILE_HIDDEN = new Set(['CoC Return','Type & Units']);
-    const NUMERIC_COLS = new Set(['List Price','Est. Rent/mo','1% Ratio','Monthly Cash Flow','CoC Return']);
-    const EXCLUDED = new Set(['A11947369','A11975757']);
+    const DISPLAY_COLUMNS = [
+      'Rank', 'MLS #', 'Address', 'Type & Units', 'List Price', 'Est. Rent/mo',
+      '1% Ratio', 'Monthly Cash Flow', 'CoC Return', ''
+    ];
 
-    let rawData = [], filteredData = [], currentSort = {col:'1% Ratio', dir:'desc'};
+    // MLS IDs excluded due to data anomalies — never shown on website
+    const EXCLUDED_MLS_IDS = new Set([
+      'A11947369', // rent $36,000/mo on $729K duplex — likely annual figure in monthly field
+      'A11975757'  // rent $16,173,120/mo on $635K triplex — formatting error in source CSV
+    ]);
 
-    document.addEventListener('DOMContentLoaded', init);
+    const NUMERIC_COLUMNS = [
+      'Rank', 'List Price', 'Est. Rent/mo',
+      '1% Ratio', 'Monthly Cash Flow', 'CoC Return'
+    ];
 
+    let rawData = [];
+    let filteredData = [];
+    let currentSort = { column: '1% Ratio', direction: 'desc' };
     async function init() {
       try {
         const resp = await fetch(SHEET_CSV_URL);
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const csv = await resp.text();
-        rawData = parseCSV(csv).filter(r => !EXCLUDED.has((r['MLS #']||'').trim()));
-        if (!rawData.length) throw new Error('No data found.');
+        rawData = parseCSV(csv);
+        if (rawData.length === 0) throw new Error('No data found.');
 
-        const lu = rawData[0]['Last Updated'] || '';
-        document.getElementById('last-updated').textContent = lu ? 'Updated: ' + lu : '';
-
-        const passing = rawData.filter(r => pn(r['1% Ratio']) >= 1.0).length;
-        const scores = rawData.map(r => pn(r['Score'])).filter(n => !isNaN(n));
-        const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : '—';
-        document.getElementById('total-count').textContent = rawData.length;
-        document.getElementById('pass-count').textContent = passing;
-        document.getElementById('avg-score').textContent = avg;
-
-        const sel = document.getElementById('city');
-        const locs = new Set(rawData.map(r => r['County']||r['ZIP']||'').filter(Boolean));
-        Array.from(locs).sort().forEach(l => { const o = document.createElement('option'); o.value=l; o.textContent=l; sel.appendChild(o); });
-
-        ['search','city','units','min-ratio'].forEach(id => {
-          const el = document.getElementById(id);
-          el.addEventListener('change', applyFilters);
-          if (id==='search') el.addEventListener('input', applyFilters);
+        // Filter out excluded MLS IDs (data anomalies)
+        rawData = rawData.filter(row => {
+          const mls = (row['MLS #'] || row['MLS ID'] || row['MLS'] || '').trim();
+          return !EXCLUDED_MLS_IDS.has(mls);
         });
 
-        applyFilters();
+        rawData.forEach((row, i) => {
+          if (!row['Rank']) row['_calc_rank'] = i + 1;
+        });
+
+        populateCityFilter();
+        updateStats();
+        setLastUpdated();
+
+        filteredData = [...rawData];
+        sortData();
+        renderHeaders();
+        renderTable();
+
         document.getElementById('loading').style.display = 'none';
         document.getElementById('app').style.display = 'block';
-      } catch(e) {
-        document.getElementById('loading').innerHTML = '<div class="error"><strong>Could not load listings.</strong><br>' + e.message + '</div>';
+        setupListeners();
+
+      } catch (err) {
+        document.getElementById('loading').innerHTML =
+          '<div class="error-box"><strong>Could not load listings.</strong><br>Check the CSV URL or try again later.<br><small style="opacity:0.7">' + err.message + '</small></div>';
       }
     }
 
-    function applyFilters() {
-      const q = document.getElementById('search').value.toLowerCase();
-      const loc = document.getElementById('city').value;
-      const units = document.getElementById('units').value;
-      const minR = parseFloat(document.getElementById('min-ratio').value)||0;
+    function setLastUpdated() {
+      const el = document.getElementById('last-updated');
+      const sample = rawData[0] || {};
+      const dateVal = sample['Last Updated'] || sample['last_updated'] || sample['LastUpdated'];
+      if (dateVal) {
+        el.textContent = 'Last updated: ' + dateVal;
+      } else {
+        el.textContent = 'Last updated: Current issue';
+      }
+    }
 
-      filteredData = rawData.filter(r => {
-        if (q && !(r['Address']||'').toLowerCase().includes(q) && !(r['MLS #']||'').toLowerCase().includes(q)) return false;
-        if (loc && (r['County']||r['ZIP']||'').trim()!==loc) return false;
-        if (units) { const m=(r['Type & Units']||'').match(/\((\d+)\)/); if (!m||m[1]!==units) return false; }
-        if (minR>0) { let rat=pn(r['1% Ratio']); if(rat<0.2) rat*=100; if(isNaN(rat)||rat<minR) return false; }
+    function updateStats() {
+      document.getElementById('stat-total').textContent = rawData.length;
+      const passing = rawData.filter(r => {
+        let ratio = parseNumber(r['1% Ratio']);
+        if (!String(r['1% Ratio'] || '').includes('%') && ratio < 0.2) ratio *= 100;
+        return ratio >= 1.0;
+      }).length;
+      document.getElementById('stat-passing').textContent = passing;
+      const scores = rawData.map(r => parseNumber(r['Score'] || r['Total Score'])).filter(n => !isNaN(n));
+      if (scores.length) {
+        const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+        document.getElementById('stat-avg-score').textContent = avg.toFixed(1);
+      }
+    }
+
+    function setupListeners() {
+      ['search', 'city', 'units', 'min-ratio'].forEach(id => {
+        document.getElementById(id).addEventListener('input', applyFilters);
+        document.getElementById(id).addEventListener('change', applyFilters);
+      });
+    }
+
+    function populateCityFilter() {
+      const sel = document.getElementById('city');
+      const cities = new Set();
+      rawData.forEach(row => {
+        const loc = row['City'] || row['Location'] || row['Zip'] || row['ZIP'] || row['County'] || '';
+        if (loc) cities.add(loc.trim());
+      });
+      Array.from(cities).sort().forEach(city => {
+        const opt = document.createElement('option');
+        opt.value = city; opt.textContent = city;
+        sel.appendChild(opt);
+      });
+    }
+
+    function applyFilters() {
+      const q       = document.getElementById('search').value.toLowerCase().trim();
+      const city    = document.getElementById('city').value;
+      const units   = document.getElementById('units').value;
+      const minRatio = parseFloat(document.getElementById('min-ratio').value) || 0;
+
+      filteredData = rawData.filter(row => {
+        const loc = row['City'] || row['Location'] || row['Zip'] || row['ZIP'] || row['County'] || '';
+
+        if (q) {
+          const addr = (row['Address'] || '').toLowerCase();
+          const mls  = (row['MLS ID'] || row['MLS #'] || '').toLowerCase();
+          if (!addr.includes(q) && !mls.includes(q)) return false;
+        }
+        if (city && loc.trim() !== city) return false;
+        if (units) {
+          const u = parseNumber(row['Units']);
+          if (u !== parseInt(units)) return false;
+        }
+        if (minRatio > 0) {
+          let r = parseNumber(row['1% Ratio']);
+          if (!String(row['1% Ratio'] || '').includes('%') && r < 0.2) r *= 100;
+          if (r < minRatio) return false;
+        }
         return true;
       });
 
-      document.getElementById('showing-count').textContent = filteredData.length;
-      sortData(); renderHeaders(); renderTable();
+      sortData();
+      renderHeaders();
+      renderTable();
+
+      const rc = document.getElementById('result-count');
+      rc.innerHTML = `Showing <strong>${filteredData.length}</strong> of ${rawData.length} listings`;
     }
 
     function sortData() {
-      const {col,dir} = currentSort; const d = dir==='asc'?1:-1;
-      filteredData.sort((a,b) => {
-        let va=a[col]||'', vb=b[col]||'';
-        if (NUMERIC_COLS.has(col)) { let na=pn(va),nb=pn(vb); if(isNaN(na))na=-Infinity; if(isNaN(nb))nb=-Infinity; return (na-nb)*d; }
-        return String(va).localeCompare(String(vb))*d;
+      const col = currentSort.column;
+      const dir = currentSort.direction === 'asc' ? 1 : -1;
+      const num = NUMERIC_COLUMNS.includes(col);
+
+      filteredData.sort((a, b) => {
+        let vA = getVal(a, col), vB = getVal(b, col);
+        if (num) {
+          let nA = parseNumber(vA), nB = parseNumber(vB);
+          if (isNaN(nA)) nA = dir > 0 ? Infinity : -Infinity;
+          if (isNaN(nB)) nB = dir > 0 ? Infinity : -Infinity;
+          return (nA - nB) * dir;
+        }
+        return String(vA).localeCompare(String(vB)) * dir;
       });
     }
 
+    function getVal(row, col) {
+      if (col === 'MLS #')            return row['MLS #'] || row['MLS ID'] || row['MLS'] || '';
+      if (col === 'Address')          return row['Address'] || '';
+      if (col === 'Type & Units')     return row['Type & Units'] || (row['Type'] ? `${row['Type']} (${row['Units'] || '?'})` : '');
+      if (col === 'List Price')       return row['List Price'] || row['Price ($)'] || '';
+      if (col === 'Est. Rent/mo')     return row['Est. Rent/mo'] || row['Est. Monthly Rent'] || row['Est. Rent ($/mo)'] || '';
+      if (col === '1% Ratio')         return row['1% Ratio'] || '';
+      if (col === 'Monthly Cash Flow')return row['Monthly Cash Flow'] || row['Net Cash Flow'] || row['Net Cash Flow ($/mo)'] || '';
+      if (col === 'CoC Return')       return row['CoC Return'] || row['Cash on Cash'] || '';
+      if (col === 'Rank')             return row['Rank'] || row['_calc_rank'] || '';
+      return row[col] || '';
+    }
+
     function handleSort(col) {
-      currentSort = currentSort.col===col ? {col, dir:currentSort.dir==='asc'?'desc':'asc'} : {col, dir:col==='1% Ratio'?'desc':'asc'};
+      if (col === '') return;
+      if (currentSort.column === col) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.column = col;
+        currentSort.direction = col === 'List Price' ? 'asc' : 'desc';
+      }
       sortData(); renderHeaders(); renderTable();
     }
 
     function renderHeaders() {
       const thead = document.getElementById('table-head');
       thead.innerHTML = '';
+      const tr = document.createElement('tr');
       DISPLAY_COLUMNS.forEach(col => {
         const th = document.createElement('th');
-        if (MOBILE_HIDDEN.has(col)) th.className='hide-mobile';
+        if (col === '') {
+          tr.appendChild(th);
+          return;
+        }
+        if (col === 'Type & Units') th.className = 'hide-mobile';
+        
+        if (col === 'Rank') { th.style.width = '44px'; th.style.minWidth = '44px'; th.style.maxWidth = '44px'; }
+        if (col === 'MLS #') { th.style.width = '108px'; th.style.minWidth = '108px'; th.style.maxWidth = '108px'; }
         th.onclick = () => handleSort(col);
-        const icon = currentSort.col===col ? (currentSort.dir==='asc'?' ↑':' ↓') : '';
-        th.innerHTML = col + '<span class="sort-icon">'+icon+'</span>';
-        thead.appendChild(th);
+        const isSorted = currentSort.column === col;
+        if (isSorted) th.classList.add('sorted');
+        const arrow = isSorted
+          ? `<span class="sort-arrow">${currentSort.direction === 'asc' ? '↑' : '↓'}</span>`
+          : `<span class="sort-arrow" style="opacity:0.25">↕</span>`;
+        th.innerHTML = col + arrow;
+        tr.appendChild(th);
       });
+      thead.appendChild(tr);
     }
 
     function renderTable() {
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
-      if (!filteredData.length) {
-        tbody.innerHTML = '<tr><td colspan="'+DISPLAY_COLUMNS.length+'" style="text-align:center;padding:2rem;">No listings match your filters.</td></tr>';
+
+      if (filteredData.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="${DISPLAY_COLUMNS.length}" style="text-align:center;padding:3rem;color:var(--text-muted)">No listings match your filters.</td>`;
+        tbody.appendChild(tr);
         return;
       }
-      filteredData.forEach((row,idx) => {
+
+      let altCount = 0;
+      filteredData.forEach((row, index) => {
         const tr = document.createElement('tr');
-        const rank = parseInt(row['Rank'])||(idx+1);
-        if (rank<=3) tr.className='top-3'; else if(idx%2===1) tr.className='alt-row';
+        tr.className = 'main-row ' + (altCount++ % 2 === 0 ? 'row-norm' : 'row-alt');
+        
+        const rank = parseNumber(row['Rank'] || row['_calc_rank']);
+        const isTop3 = rank >= 1 && rank <= 3;
+        if (isTop3) tr.classList.add('row-top3');
 
         DISPLAY_COLUMNS.forEach(col => {
           const td = document.createElement('td');
-          if (MOBILE_HIDDEN.has(col)) td.className='hide-mobile';
-          const val = row[col]||'';
+          if (col === '') {
+            td.className = 'chevron-cell';
+            td.innerHTML = '▸';
+            tr.appendChild(td);
+            return;
+          }
+          let val = getVal(row, col);
 
-          if (col==='Rank') {
-            td.textContent = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank;
-          } else if (col==='MLS #') {
-            const url = row['Listing URL']||'';
-            td.innerHTML = url ? '<a href="'+url+'" target="_blank" class="mls-link">'+val+'</a>' : val;
-          } else if (col==='List Price') {
-            td.textContent = fp(val);
-          } else if (col==='Est. Rent/mo') {
-            td.textContent = fr(val);
-          } else if (col==='1% Ratio') {
-            const n=pn(val); let cls='ratio-miss', disp=val;
-            if (!isNaN(n)) { const p=n<0.2?n*100:n; disp=p.toFixed(2)+'%'; cls=p>=1.0?'ratio-pass':p>=0.9?'ratio-close':'ratio-miss'; }
-            td.innerHTML='<span class="ratio-pill '+cls+'">'+disp+'</span>';
-          } else if (col==='Monthly Cash Flow') {
-            const n=pn(val);
-            if (isNaN(n)) { td.textContent=val; }
-            else { const f='$'+Math.abs(n).toLocaleString('en-US',{maximumFractionDigits:0})+'/mo'; td.innerHTML=n<0?'<span class="negative">-'+f+'</span>':'<span class="positive">+'+f+'</span>'; }
-          } else if (col==='CoC Return') {
-            const n=pn(val);
-            if (!isNaN(n)) td.innerHTML=n<0?'<span class="negative">'+val+'</span>':'<span class="positive">'+val+'</span>';
-            else td.textContent=val;
-          } else {
-            td.textContent=val;
+          switch (col) {
+            case 'Rank':
+              td.innerHTML = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+              break;
+            case 'MLS #': {
+              const mlsUrl = row['Listing URL'] || row['Listing Link'] || row['MLS Link'] || '';
+              td.style.textAlign = 'center';
+              if (mlsUrl && mlsUrl !== '#') {
+                td.innerHTML = `<a href="${mlsUrl}" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600;text-decoration:none;white-space:nowrap;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${val || '—'}</a>`;
+              } else {
+                td.textContent = val || '—';
+              }
+              break;
+            }
+            case 'Address':
+              td.className = 'address-cell';
+              td.textContent = val;
+              break;
+            case 'List Price':
+              td.textContent = fmtPrice(val);
+              break;
+            case 'Est. Rent/mo':
+              td.textContent = fmtRent(val);
+              break;
+            case '1% Ratio': {
+              const num = parseRatio(val);
+              const cls = num >= 1.0 ? 'ratio-pass' : num >= 0.9 ? 'ratio-close' : 'ratio-miss';
+              td.innerHTML = `<span class="ratio-pill ${cls}">${isNaN(num) ? '—' : num.toFixed(2) + '%'}</span>`;
+              break;
+            }
+            case 'Monthly Cash Flow':
+              td.innerHTML = fmtCashFlow(val);
+              break;
+            case 'CoC Return':
+              td.innerHTML = fmtCoC(val);
+              break;
+            default:
+              td.textContent = val || '—';
           }
           tr.appendChild(td);
         });
+
+        const detailTr = document.createElement('tr');
+        detailTr.className = 'detail-row';
+
+        const zip = row['ZIP'] || row['Zip'] || '—';
+        const county = row['County'] || '—';
+        const priceNum = parseNumber(getVal(row, 'List Price'));
+        const dp = !isNaN(priceNum) ? fmtPrice(priceNum * 0.25) : '—';
+        const score = row['Score'] || row['Total Score'] || '—';
+        const lastUpd = row['Last Updated'] || row['last_updated'] || row['LastUpdated'] || '—';
+        const url = row['Listing URL'] || row['Listing Link'] || row['MLS Link'] || '#';
+        const urlBtn = url !== '#' ? `<a href="${url}" target="_blank" rel="noopener" class="view-btn">View Listing →</a>` : '';
+
+        const detailHtml = `
+          <td colspan="${DISPLAY_COLUMNS.length}">
+            <div class="detail-card">
+              <div class="detail-section">
+                <div class="detail-item"><span class="detail-label">ZIP Code</span><span class="detail-value">${zip}</span></div>
+                <div class="detail-item"><span class="detail-label">County</span><span class="detail-value">${county}</span></div>
+                <div class="detail-item"><span class="detail-label">Est. Down Payment (25%)</span><span class="detail-value">${dp}</span></div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-item"><span class="detail-label">Total Score</span><span class="detail-value">${score}</span></div>
+                <div class="detail-item"><span class="detail-label">Last Updated</span><span class="detail-value">${lastUpd}</span></div>
+                <div style="text-align:right">${urlBtn}</div>
+              </div>
+            </div>
+          </td>
+        `;
+        detailTr.innerHTML = detailHtml;
+
+        tr.onclick = () => {
+          const wasOpen = detailTr.classList.contains('open');
+          document.querySelectorAll('.detail-row.open').forEach(el => { el.classList.remove('open'); el.previousElementSibling.classList.remove('expanded'); });
+          if (!wasOpen) {
+            detailTr.classList.add('open');
+            tr.classList.add('expanded');
+          }
+        };
+
         tbody.appendChild(tr);
+        tbody.appendChild(detailTr);
       });
+
+      const rc = document.getElementById('result-count');
+      if (!rc.innerHTML) {
+        rc.innerHTML = `Showing <strong>${filteredData.length}</strong> of ${rawData.length} listings`;
+      }
     }
 
-    function pn(s) { if(s===null||s===undefined||s==='') return NaN; if(typeof s==='number') return s; return parseFloat(s.toString().replace(/[^0-9.-]+/g,'')); }
-    function fp(v) { const n=pn(v); return isNaN(n)?v:'$'+n.toLocaleString('en-US',{maximumFractionDigits:0}); }
-    function fr(v) { const n=pn(v); return isNaN(n)?v:'$'+n.toLocaleString('en-US',{maximumFractionDigits:0})+'/mo'; }
+    function parseNumber(str) {
+      if (!str && str !== 0) return NaN;
+      if (typeof str === 'number') return str;
+      return parseFloat(str.toString().replace(/[^0-9.-]+/g, ''));
+    }
 
+    function parseRatio(val) {
+      let n = parseNumber(val);
+      if (!String(val || '').includes('%') && n < 0.2) n *= 100;
+      return n;
+    }
+
+    function fmtPrice(val) {
+      const n = parseNumber(val);
+      return isNaN(n) ? '—' : '$' + n.toLocaleString('en-US', {maximumFractionDigits:0});
+    }
+
+    function fmtRent(val) {
+      const n = parseNumber(val);
+      return isNaN(n) ? '—' : '$' + n.toLocaleString('en-US', {maximumFractionDigits:0}) + '/mo';
+    }
+
+    function fmtRatio(val) {
+      const n = parseRatio(val);
+      return isNaN(n) ? '—' : n.toFixed(2) + '%';
+    }
+
+    function fmtCashFlow(val) {
+      const n = parseNumber(val);
+      if (isNaN(n)) return '—';
+      const f = '$' + Math.abs(n).toLocaleString('en-US', {maximumFractionDigits:0}) + '/mo';
+      return n < 0 ? `<span class="cash-neg">−${f}</span>` : `<span class="cash-pos">+${f}</span>`;
+    }
+
+    function fmtCoC(val) {
+      let n = parseNumber(val);
+      if (!String(val || '').includes('%') && n < 0.2 && n > -0.2) n *= 100;
+      if (isNaN(n)) return '—';
+      const s = n.toFixed(1) + '%';
+      return n < 0 ? `<span class="cash-neg">${s}</span>` : `<span class="cash-pos">${s}</span>`;
+    }
+
+    // -- CSV PARSER
     function parseCSV(text) {
-      const rows=[]; let row=[],val='',inQ=false;
-      for (let i=0;i<text.length;i++) {
-        const c=text[i];
-        if (inQ) { if(c==='"'&&text[i+1]==='"'){val+='"';i++;} else if(c==='"')inQ=false; else val+=c; }
-        else { if(c==='"')inQ=true; else if(c===','){row.push(val.trim());val='';} else if(c==='\n'){row.push(val.trim());rows.push(row);row=[];val='';} else if(c!=='\r')val+=c; }
+      const rows = [];
+      let row = [], val = '', inQ = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQ) {
+          if (c === '"' && text[i+1] === '"') { val += '"'; i++; }
+          else if (c === '"') inQ = false;
+          else val += c;
+        } else {
+          if (c === '"') inQ = true;
+          else if (c === ',') { row.push(val); val = ''; }
+          else if (c === '\n') { row.push(val); rows.push(row); row = []; val = ''; }
+          else if (c !== '\r') val += c;
+        }
       }
-      if(val||row.length){row.push(val.trim());rows.push(row);}
-      if(!rows.length) return [];
-      let hIdx=0;
-      for(let i=0;i<Math.min(rows.length,5);i++){
-        const first=(rows[i][0]||'').trim();
-        if(first==='MLS #'||first==='MLS ID'){hIdx=i;break;}
-        if(first.includes('MLS #')){hIdx=i;break;}
+      if (val || row.length) { row.push(val); rows.push(row); }
+      if (!rows.length) return [];
+
+      // Skip title/subtitle rows at top of PUBLISH sheet.
+      // Real header row: first cell is 'MLS #' or 'MLS ID',
+      // or row has 5+ non-empty cells with a short first cell.
+      let hIdx = 0;
+      for (let i = 0; i < Math.min(rows.length, 6); i++) {
+        const first = (rows[i][0] || '').trim();
+        const nonEmpty = rows[i].filter(v => v.trim()).length;
+        if (first === 'MLS #' || first === 'MLS ID' || first === 'MLS') { hIdx = i; break; }
+        if (nonEmpty >= 5 && first.length < 20) { hIdx = i; break; }
       }
-      let headers=rows[hIdx].map(h=>h.trim());
-      if(headers[0]&&headers[0]!=='MLS #'&&headers[0].includes('MLS #')) headers[0]='MLS #';
-      return rows.slice(hIdx+1).filter(r=>r.filter(v=>v).length>1).map(r=>Object.fromEntries(headers.map((h,j)=>[h,r[j]||''])));
+
+      // If title text was merged into first header cell, clean it
+      const rawHeaders = rows[hIdx].map(h => h.trim());
+      if (rawHeaders[0] && rawHeaders[0] !== 'MLS #' && rawHeaders[0].includes('MLS #')) {
+        rawHeaders[0] = 'MLS #';
+      } else if (rawHeaders[0] && rawHeaders[0] !== 'MLS ID' && rawHeaders[0].includes('MLS ID')) {
+        rawHeaders[0] = 'MLS ID';
+      }
+
+      return rows.slice(hIdx + 1)
+        .filter(r => r.filter(v => v.trim()).length > 1)
+        .map(r => Object.fromEntries(rawHeaders.map((h, j) => [h, (r[j] || '').trim()])));
     }
+
+    // ── START ─────────────────────────────────────────────────────
+    init();
   </script>
 </body>
 </html>
