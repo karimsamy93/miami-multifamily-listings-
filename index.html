@@ -582,9 +582,6 @@
     let rawData = [];
     let filteredData = [];
     let currentSort = { column: '1% Ratio', direction: 'desc' };
-    function dbg(msg) {
-      const d = document.getElementById('debug-log') || document.createElement('div');
-      if (!d.id) { d.id='debug-log'; d.style='position:fixed;top:0;left:0;right:0;background:#fff;color:#000;font-size:12px;padding:8px;z-index:9999;border-bottom:2px solid red;font-family:monospace;'; document.body.prepend(d); }
       d.innerHTML += msg + '<br>';
       console.log(msg);
     }
@@ -593,19 +590,15 @@
       try {
         dbg('1. Starting fetch: ' + SHEET_CSV_URL.slice(0,60));
         const resp = await fetch(SHEET_CSV_URL);
-        dbg('2. Fetch status: ' + resp.status + ' ok=' + resp.ok);
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const csv = await resp.text();
-        dbg('3. CSV length: ' + csv.length + ' chars');
         rawData = parseCSV(csv);
-        dbg('4. parseCSV result: ' + rawData.length + ' rows');
         if (rawData.length === 0) throw new Error('No data found.');
 
         rawData = rawData.filter(row => {
           const mls = (row['MLS #'] || row['MLS ID'] || row['MLS'] || '').trim();
           return !EXCLUDED_MLS_IDS.has(mls);
         });
-        dbg('5. After exclude filter: ' + rawData.length + ' rows');
 
         rawData.forEach((row, i) => {
           if (!row['Rank']) row['_calc_rank'] = i + 1;
@@ -616,7 +609,6 @@
         setLastUpdated();
 
         filteredData = [...rawData];
-        dbg('6. filteredData set: ' + filteredData.length + ' rows');
         sortData();
         renderHeaders();
         renderTable();
@@ -624,11 +616,9 @@
 
         document.getElementById('loading').style.display = 'none';
         document.getElementById('app').style.display = 'block';
-        dbg('8. Done — app visible');
         setupListeners();
 
       } catch (err) {
-        dbg('ERROR: ' + err.message);
         document.getElementById('loading').innerHTML =
           '<div class="error-box"><strong>Could not load listings.</strong><br>Check the CSV URL or try again later.<br><small style="opacity:0.7">' + err.message + '</small></div>';
       }
