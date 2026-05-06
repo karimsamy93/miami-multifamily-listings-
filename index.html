@@ -582,19 +582,15 @@
     let rawData = [];
     let filteredData = [];
     let currentSort = { column: '1% Ratio', direction: 'desc' };
-      d.innerHTML += msg + '<br>';
-      console.log(msg);
-    }
-
     async function init() {
       try {
-        dbg('1. Starting fetch: ' + SHEET_CSV_URL.slice(0,60));
         const resp = await fetch(SHEET_CSV_URL);
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const csv = await resp.text();
         rawData = parseCSV(csv);
         if (rawData.length === 0) throw new Error('No data found.');
 
+        // Filter out excluded MLS IDs (data anomalies)
         rawData = rawData.filter(row => {
           const mls = (row['MLS #'] || row['MLS ID'] || row['MLS'] || '').trim();
           return !EXCLUDED_MLS_IDS.has(mls);
@@ -612,7 +608,6 @@
         sortData();
         renderHeaders();
         renderTable();
-        dbg('7. renderTable done, tbody rows: ' + document.querySelectorAll("#table-body tr").length);
 
         document.getElementById('loading').style.display = 'none';
         document.getElementById('app').style.display = 'block';
@@ -963,7 +958,7 @@
       for (let i = 0; i < Math.min(rows.length, 6); i++) {
         const first = (rows[i][0] || '').trim();
         const nonEmpty = rows[i].filter(v => v.trim()).length;
-        if (first === 'MLS #' || first === 'MLS ID' || first === 'MLS') { hIdx = i; break; }
+        if (first.includes('MLS #') || first.includes('MLS ID') || first === 'MLS') { hIdx = i; break; }
         if (nonEmpty >= 5 && first.length < 20) { hIdx = i; break; }
       }
 

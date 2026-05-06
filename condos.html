@@ -956,7 +956,7 @@
       for (let i = 0; i < Math.min(rows.length, 6); i++) {
         const first = (rows[i][0] || '').trim();
         const nonEmpty = rows[i].filter(v => v.trim()).length;
-        if (first === 'MLS #' || first === 'MLS ID' || first === 'MLS') { hIdx = i; break; }
+        if (first.includes('MLS #') || first.includes('MLS ID') || first === 'MLS') { hIdx = i; break; }
         if (nonEmpty >= 5 && first.length < 20) { hIdx = i; break; }
       }
 
